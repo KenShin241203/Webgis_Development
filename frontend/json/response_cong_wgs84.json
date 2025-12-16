@@ -1,0 +1,842 @@
+{
+    "message": "Lấy dữ liệu cong thành công",
+    "data": [
+        {
+            "id": 0,
+            "ten": "Cống Rạch Rum",
+            "cap": 1,
+            "namxaydung": 0,
+            "tenxa": "Huyện Cầu Kè",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 0,
+            "ghichu": "Tốt",
+            "codecong": 3,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 1",
+            "ten_rieng": "Rạch Rum",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.553547,
+                    9.823091
+                ]
+            }
+        },
+        {
+            "id": 1,
+            "ten": "Cống Mỹ Văn",
+            "cap": 0,
+            "namxaydung": 0,
+            "tenxa": "Huyện Cầu Kè",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 0,
+            "ghichu": "Tốt",
+            "codecong": 10,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 1",
+            "ten_rieng": "Mỹ Văn",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.582393,
+                    9.799921
+                ]
+            }
+        },
+        {
+            "id": 2,
+            "ten": "Cống Cái Hóp",
+            "cap": 0,
+            "namxaydung": 0,
+            "tenxa": "Huyện Càng Long",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 0,
+            "ghichu": "Tốt",
+            "codecong": 96,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 1",
+            "ten_rieng": "Cái Hóp",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.751726,
+                    10.065308
+                ]
+            }
+        },
+        {
+            "id": 3,
+            "ten": "Cống Cần Chông",
+            "cap": 0,
+            "namxaydung": 2005,
+            "tenxa": "Huyện Tiểu Cần",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 8,
+            "ghichu": "Trung bình",
+            "codecong": 97,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 2",
+            "ten_rieng": "Cần Chông",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.642024,
+                    9.763532
+                ]
+            }
+        },
+        {
+            "id": 4,
+            "ten": "Cống Trẹm",
+            "cap": 1,
+            "namxaydung": 1998,
+            "tenxa": "Huyện Tiểu Cần",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 1,
+            "ghichu": "Tốt",
+            "codecong": 99,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 1",
+            "ten_rieng": "Trẹm",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.644772,
+                    9.739466
+                ]
+            }
+        },
+        {
+            "id": 5,
+            "ten": "Cống Bắc Trang",
+            "cap": 1,
+            "namxaydung": 1998,
+            "tenxa": "Huyện Trà Cú",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 1,
+            "ghichu": "Tốt",
+            "codecong": 100,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 1",
+            "ten_rieng": "Bắc Trang",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.660069,
+                    9.723868
+                ]
+            }
+        },
+        {
+            "id": 6,
+            "ten": "Cống Thâu Râu",
+            "cap": 0,
+            "namxaydung": 0,
+            "tenxa": "Huyện Cầu Ngang",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 0,
+            "ghichu": "Tốt",
+            "codecong": 112,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 1",
+            "ten_rieng": "Thâu Râu",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    106.021314,
+                    9.732441
+                ]
+            }
+        },
+        {
+            "id": 7,
+            "ten": "Cống Bến Chùa",
+            "cap": 0,
+            "namxaydung": 0,
+            "tenxa": "Huyện Cầu Ngang",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 0,
+            "ghichu": "Tốt",
+            "codecong": 113,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 1",
+            "ten_rieng": "Bến Chùa",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    106.021924,
+                    9.730136
+                ]
+            }
+        },
+        {
+            "id": 8,
+            "ten": "Cống Ngãi hiệp",
+            "cap": 0,
+            "namxaydung": 0,
+            "tenxa": "Huyện Châu Thà",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 0,
+            "ghichu": "Tốt",
+            "codecong": 131,
+            "ctrinh_day": -4.5,
+            "ten_chung": "Loại 1",
+            "ten_rieng": "Ngãi Hiệp",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.916278,
+                    9.905052
+                ]
+            }
+        },
+        {
+            "id": 9,
+            "ten": "Cống Ngãi Hòa",
+            "cap": 0,
+            "namxaydung": 0,
+            "tenxa": "Huyện Châu Thà",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 0,
+            "ghichu": "Tốt",
+            "codecong": 132,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 1",
+            "ten_rieng": "Ngãi Hòa",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.925009,
+                    9.896658
+                ]
+            }
+        },
+        {
+            "id": 10,
+            "ten": "Cống Chà Và",
+            "cap": 1,
+            "namxaydung": 0,
+            "tenxa": "Huyện Châu Thà",
+            "sophai": 0,
+            "bkhoang_c": 15,
+            "tongcua_c": 2,
+            "ghichu": "Trung bình",
+            "codecong": 134,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 2",
+            "ten_rieng": "Chà Và",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.943564,
+                    9.870123
+                ]
+            }
+        },
+        {
+            "id": 11,
+            "ten": "Cống Vĩnh Kim",
+            "cap": 1,
+            "namxaydung": 0,
+            "tenxa": "Huyện Châu Thà",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 0,
+            "ghichu": "Kém",
+            "codecong": 135,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 3",
+            "ten_rieng": "Vĩnh Kim",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.94517,
+                    9.870173
+                ]
+            }
+        },
+        {
+            "id": 12,
+            "ten": "Cống Vĩnh Bình",
+            "cap": 1,
+            "namxaydung": 2000,
+            "tenxa": "Huyện Cầu Ngang",
+            "sophai": 0,
+            "bkhoang_c": 15,
+            "tongcua_c": 2,
+            "ghichu": "Tốt",
+            "codecong": 136,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 2",
+            "ten_rieng": "Vĩnh Bình",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.949412,
+                    9.870708
+                ]
+            }
+        },
+        {
+            "id": 13,
+            "ten": "Cống Rạch Rập",
+            "cap": 1,
+            "namxaydung": 0,
+            "tenxa": "Huyện Cầu Ngang",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 0,
+            "ghichu": "Tốt",
+            "codecong": 142,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 2",
+            "ten_rieng": "Rạch Rập",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.96851,
+                    9.857844
+                ]
+            }
+        },
+        {
+            "id": 14,
+            "ten": "Cống Cá Trê",
+            "cap": 1,
+            "namxaydung": 0,
+            "tenxa": "Huyện Cầu Ngang",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 0,
+            "ghichu": "Tốt",
+            "codecong": 143,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 1",
+            "ten_rieng": "Cá Trê",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.972477,
+                    9.852829
+                ]
+            }
+        },
+        {
+            "id": 15,
+            "ten": "Cống Lung Mít",
+            "cap": 1,
+            "namxaydung": 0,
+            "tenxa": "Huyện Cầu Ngang",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 0,
+            "ghichu": "Tốt",
+            "codecong": 144,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 2",
+            "ten_rieng": "Lung Mít",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.985112,
+                    9.838707
+                ]
+            }
+        },
+        {
+            "id": 16,
+            "ten": "Cống Phú Thứ",
+            "cap": 1,
+            "namxaydung": 0,
+            "tenxa": "Huyện Cầu Ngang",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 0,
+            "ghichu": "Tốt",
+            "codecong": 145,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 2",
+            "ten_rieng": "Phú Thứ",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.992845,
+                    9.830107
+                ]
+            }
+        },
+        {
+            "id": 17,
+            "ten": "Cống Láng Thé",
+            "cap": 0,
+            "namxaydung": 0,
+            "tenxa": "Huyện Càng Long",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 0,
+            "ghichu": "Tốt",
+            "codecong": 147,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 1",
+            "ten_rieng": "Láng Thé",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.807073,
+                    9.998807
+                ]
+            }
+        },
+        {
+            "id": 18,
+            "ten": "Cống Rạch Kinh",
+            "cap": 0,
+            "namxaydung": 0,
+            "tenxa": "Huyện Châu Thà",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 0,
+            "ghichu": "Tốt",
+            "codecong": 242,
+            "ctrinh_day": -4.5,
+            "ten_chung": "Loại 1",
+            "ten_rieng": "Rạch Kinh",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.876129,
+                    9.951859
+                ]
+            }
+        },
+        {
+            "id": 19,
+            "ten": "Cống Bà Trầm",
+            "cap": 0,
+            "namxaydung": 1999,
+            "tenxa": "Huyện Châu Thà",
+            "sophai": 0,
+            "bkhoang_c": 10,
+            "tongcua_c": 2,
+            "ghichu": "Tốt",
+            "codecong": -3,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 2",
+            "ten_rieng": "Bà Trầm",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.890932,
+                    9.934557
+                ]
+            }
+        },
+        {
+            "id": 20,
+            "ten": "Cống Đại Phước",
+            "cap": 0,
+            "namxaydung": 2006,
+            "tenxa": "Huyện Càng Long",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 1,
+            "ghichu": "Tốt",
+            "codecong": -3,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 1",
+            "ten_rieng": "Đại Phước",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.796935,
+                    10.028332
+                ]
+            }
+        },
+        {
+            "id": 21,
+            "ten": "Cống Trại Luận",
+            "cap": 0,
+            "namxaydung": 2006,
+            "tenxa": "Huyện Càng Long",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 1,
+            "ghichu": "Tốt",
+            "codecong": -3,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 2",
+            "ten_rieng": "Trại Luận",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.801942,
+                    10.008845
+                ]
+            }
+        },
+        {
+            "id": 22,
+            "ten": "Cống Trẹm Nhỏ",
+            "cap": 0,
+            "namxaydung": 2006,
+            "tenxa": "Huyện Tiểu Cần",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 1,
+            "ghichu": "Tốt",
+            "codecong": -22,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 1",
+            "ten_rieng": "Trẹm Nhỏ",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.63818,
+                    9.742927
+                ]
+            }
+        },
+        {
+            "id": 23,
+            "ten": "Cống Cầu Sắt",
+            "cap": 0,
+            "namxaydung": 2006,
+            "tenxa": "Huyện Tiểu Cần",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 0,
+            "ghichu": "Tốt",
+            "codecong": 0,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 1",
+            "ten_rieng": "Cầu Sắt",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.606329,
+                    9.779781
+                ]
+            }
+        },
+        {
+            "id": 24,
+            "ten": "Cống út Cầm",
+            "cap": 0,
+            "namxaydung": 2006,
+            "tenxa": "Huyện Cầu Kè",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 1,
+            "ghichu": "Tốt",
+            "codecong": -22,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 1",
+            "ten_rieng": "út Cầm",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.599231,
+                    9.784853
+                ]
+            }
+        },
+        {
+            "id": 25,
+            "ten": "Cống Bà Lưới",
+            "cap": 0,
+            "namxaydung": 2006,
+            "tenxa": "Huyện Cầu Kè",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 1,
+            "ghichu": "Tốt",
+            "codecong": -27,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 1",
+            "ten_rieng": "Bà Lưới",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.591326,
+                    9.790742
+                ]
+            }
+        },
+        {
+            "id": 26,
+            "ten": "Cống 7 Gượng",
+            "cap": 0,
+            "namxaydung": 2008,
+            "tenxa": "Huyện Cầu Kè",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 1,
+            "ghichu": "Tốt",
+            "codecong": -2,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 2",
+            "ten_rieng": "7 Gượng",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.574558,
+                    9.80654
+                ]
+            }
+        },
+        {
+            "id": 27,
+            "ten": "Cống 7 Nhân",
+            "cap": 0,
+            "namxaydung": 2008,
+            "tenxa": "Huyện Cầu Kè",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 1,
+            "ghichu": "Tốt",
+            "codecong": -2,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 2",
+            "ten_rieng": "7 Nhân",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.570441,
+                    9.809972
+                ]
+            }
+        },
+        {
+            "id": 28,
+            "ten": "Cống 4 Trạng",
+            "cap": 0,
+            "namxaydung": 2008,
+            "tenxa": "Huyện Cầu Kè",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 1,
+            "ghichu": "Tốt",
+            "codecong": -2,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 2",
+            "ten_rieng": "4 Trạng",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.562816,
+                    9.816262
+                ]
+            }
+        },
+        {
+            "id": 29,
+            "ten": "Cống út Xụ",
+            "cap": 0,
+            "namxaydung": 2007,
+            "tenxa": "Huyện Cầu Kè",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 1,
+            "ghichu": "Tốt",
+            "codecong": -2,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 1",
+            "ten_rieng": "út Xụ",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.530432,
+                    9.854601
+                ]
+            }
+        },
+        {
+            "id": 30,
+            "ten": "Cống 5 Cầm",
+            "cap": 0,
+            "namxaydung": 2008,
+            "tenxa": "Huyện Cầu Kè",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 1,
+            "ghichu": "Tốt",
+            "codecong": -2,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 1",
+            "ten_rieng": "5 Cầm",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.542822,
+                    9.841474
+                ]
+            }
+        },
+        {
+            "id": 31,
+            "ten": "Cống 5 Dện",
+            "cap": 0,
+            "namxaydung": 2008,
+            "tenxa": "Huyện Cầu Kè",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 1,
+            "ghichu": "Tốt",
+            "codecong": -2,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 1",
+            "ten_rieng": "5 Dện",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.538288,
+                    9.846394
+                ]
+            }
+        },
+        {
+            "id": 32,
+            "ten": "Cống 5 Dừng",
+            "cap": 0,
+            "namxaydung": 2008,
+            "tenxa": "Huyện Cầu Kè",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 1,
+            "ghichu": "Tốt",
+            "codecong": -2,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 1",
+            "ten_rieng": "5 Dừng",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.533685,
+                    9.851297
+                ]
+            }
+        },
+        {
+            "id": 33,
+            "ten": "Cống 6 Dũng",
+            "cap": 0,
+            "namxaydung": 2007,
+            "tenxa": "Huyện Cầu Kè",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 0,
+            "ghichu": "Tốt",
+            "codecong": -2,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 1",
+            "ten_rieng": "6 Dũng",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.525143,
+                    9.859952
+                ]
+            }
+        },
+        {
+            "id": 34,
+            "ten": "C. Rạch Cầu Kê",
+            "cap": 0,
+            "namxaydung": 0,
+            "tenxa": "TpTV",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 0,
+            "ghichu": "Tốt",
+            "codecong": 0,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 1",
+            "ten_rieng": "C. Rạch Cầu Kê",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.828322,
+                    10.001983
+                ]
+            }
+        },
+        {
+            "id": 35,
+            "ten": "Cống Cá Kèo",
+            "cap": 0,
+            "namxaydung": 2014,
+            "tenxa": "Mỹ Long Nam",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 1,
+            "ghichu": "Tốt",
+            "codecong": 0,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 2",
+            "ten_rieng": "Cá Kèo",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    106.015191,
+                    9.774351
+                ]
+            }
+        },
+        {
+            "id": 36,
+            "ten": "Cống Tân Dinh",
+            "cap": 0,
+            "namxaydung": 2007,
+            "tenxa": "Huyện Cầu Kè",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 0,
+            "ghichu": "Tốt",
+            "codecong": -2,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 1",
+            "ten_rieng": "Tan Dinh",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.489249,
+                    9.905832
+                ]
+            }
+        },
+        {
+            "id": 37,
+            "ten": "Cống Bông Bót",
+            "cap": 0,
+            "namxaydung": 2007,
+            "tenxa": "Huyện Cầu Kè",
+            "sophai": 0,
+            "bkhoang_c": 0,
+            "tongcua_c": 0,
+            "ghichu": "Tốt",
+            "codecong": -2,
+            "ctrinh_day": 0,
+            "ten_chung": "Loại 1",
+            "ten_rieng": "Bong Bot",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    105.511355,
+                    9.874276
+                ]
+            }
+        }
+    ],
+    "count": 38
+}

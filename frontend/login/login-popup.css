@@ -1,0 +1,383 @@
+/* CSS riêng cho popup đăng nhập */
+
+.popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 3000;
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+}
+
+/* Đảm bảo login popup hiển thị ở giữa */
+#loginPopup .popup-content {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    border-radius: 20px;
+    padding: 50px 40px;
+    width: 420px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    animation: slideInUp 0.4s ease-out;
+    z-index: 3001 !important;
+}
+
+.popup-content {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    border-radius: 20px;
+    padding: 50px 40px;
+    width: 420px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    animation: slideInUp 0.4s ease-out;
+    z-index: 3001 !important;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -40%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+@media (max-width: 600px) {
+    .popup-content {
+        width: 90%;
+        padding: 40px 30px;
+        margin: 20px;
+        border-radius: 16px;
+    }
+}
+
+#closePopup,
+#closeLoginPopup {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #6c757d;
+    background: rgba(108, 117, 125, 0.1);
+    border: none;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    font-weight: 300;
+}
+
+#closePopup:hover,
+#closeLoginPopup:hover {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    transform: scale(1.1) rotate(90deg);
+}
+
+.popup h2 {
+    margin: 0 0 35px;
+    font-size: 28px;
+    color: #2c3e50;
+    text-align: center;
+    font-weight: 700;
+    position: relative;
+    letter-spacing: -0.5px;
+}
+
+.popup h2::after {
+    content: '';
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, #3498db, #2980b9, #3498db);
+    border-radius: 2px;
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -60px 0;
+    }
+
+    100% {
+        background-position: 60px 0;
+    }
+}
+
+.popup form {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* Input group styles */
+.input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    right: 18px;
+    font-size: 20px;
+    color: #adb5bd;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    z-index: 2;
+}
+
+.popup input {
+    width: 100%;
+    padding: 18px 20px;
+    padding-right: 55px;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+    background: #ffffff;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.popup input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.15);
+    transform: translateY(-2px);
+    background: #ffffff;
+}
+
+.popup input:focus+.input-icon {
+    color: #3498db;
+    transform: scale(1.1);
+}
+
+.popup input::placeholder {
+    color: #adb5bd;
+    font-weight: 400;
+    font-size: 15px;
+}
+
+.popup button[type="submit"] {
+    padding: 18px 24px;
+    border: none;
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+    position: relative;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.popup button[type="submit"]::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.popup button[type="submit"]:hover::before {
+    left: 100%;
+}
+
+.popup button[type="submit"]:hover {
+    background: linear-gradient(135deg, #2980b9 0%, #1f6391 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(52, 152, 219, 0.4);
+}
+
+.popup button[type="submit"]:active {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
+}
+
+.popup button[type="submit"]:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Control buttons styles */
+.control-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.control-btn {
+    padding: 15px 20px;
+    border: none;
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.control-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.control-btn:hover::before {
+    left: 100%;
+}
+
+.control-btn:hover {
+    background: linear-gradient(135deg, #495057 0%, #343a40 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+}
+
+.control-btn:active {
+    transform: translateY(0);
+}
+
+.query-btn {
+    padding: 12px 20px;
+    border: none;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    margin-top: 10px;
+}
+
+.query-btn:hover {
+    background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+.query-btn:active {
+    transform: translateY(0);
+}
+
+/* Loading state */
+.btn-text,
+.btn-loading {
+    transition: opacity 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.btn-loading {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Style cho icon logout */
+#logoutBtn {
+    background: transparent !important;
+    color: white !important;
+    border: none !important;
+    padding: 8px !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    font-size: 18px !important;
+    transition: all 0.3s ease !important;
+    display: none;
+}
+
+#logoutBtn:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    transform: scale(1.1) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+#logoutBtn:active {
+    transform: scale(0.95) !important;
+}
+
+/* Style cho username */
+#headerUsername {
+    color: white !important;
+    margin-right: 10px !important;
+    font-weight: 500 !important;
+    display: none;
+}
+
+/* Thêm hiệu ứng cho input khi có lỗi */
+.popup input.error {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.15);
+}
+
+.popup input.error+.input-icon {
+    color: #dc3545;
+}
+
+/* Thêm hiệu ứng cho input khi thành công */
+.popup input.success {
+    border-color: #28a745;
+    box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.15);
+}
+
+.popup input.success+.input-icon {
+    color: #28a745;
+}

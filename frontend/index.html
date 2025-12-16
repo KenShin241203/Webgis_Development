@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đê Bao Việt Nam - WebGIS</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="tables.css">
+    <link rel="stylesheet" href="login/login-popup.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header class="main-header">
+        <div class="header-left">
+            <img src="../assets/HDH/logo.jpg" alt="Logo" class="logo">
+            <h1>WEBGIS HẢI DƯƠNG HỌC</h1>
+        </div>
+        <nav class="header-nav">
+            <div class="nav-item">
+                <button id="toggleWeatherBtn" class="nav-btn">🌤️ Thời tiết</button>
+            </div>
+            <div class="nav-item dropdown" id="layerDropdownContainer" style="display: none;">
+                <button class="nav-btn dropdown-toggle" id="layerDropdownBtn">
+                    Thêm lớp <span class="dropdown-arrow">▼</span>
+                </button>
+                <div class="dropdown-menu" id="layerDropdownMenu">
+                    <div class="dropdown-item" data-layer="cong">
+                        <span class="layer-name">Cống</span>
+                        <button class="table-toggle-btn" data-layer="cong" disabled>📊</button>
+                    </div>
+                    <div class="dropdown-item" data-layer="chatluong">
+                        <span class="layer-name">Chất lượng</span>
+                        <button class="table-toggle-btn" data-layer="chatluong" disabled>📊</button>
+                    </div>
+                    <div class="dropdown-item" data-layer="debao">
+                        <span class="layer-name">Đê bao</span>
+                        <button class="table-toggle-btn" data-layer="debao" disabled>📊</button>
+                    </div>
+                    <div class="dropdown-item" data-layer="dolun">
+                        <span class="layer-name">Độ lún</span>
+                        <button class="table-toggle-btn" data-layer="dolun" disabled>📊</button>
+                    </div>
+                    <div class="dropdown-item" data-layer="hientrang">
+                        <span class="layer-name">Hiện trạng</span>
+                        <button class="table-toggle-btn" data-layer="hientrang" disabled>📊</button>
+                    </div>
+                    <div class="dropdown-item" data-layer="sutlun">
+                        <span class="layer-name">Sụt lún</span>
+                        <button class="table-toggle-btn" data-layer="sutlun" disabled>📊</button>
+                    </div>
+                    <div class="dropdown-item" data-layer="ngaplut">
+                        <span class="layer-name">Ngập lụt</span>
+                        <button class="table-toggle-btn" data-layer="ngaplut" disabled>📊</button>
+                    </div>
+                    <div class="dropdown-item" data-layer="khaosat">
+                        <span class="layer-name">Điểm khảo sát</span>
+                        <button class="table-toggle-btn" data-layer="khaosat" disabled>📊</button>
+                    </div>
+                </div>
+            </div>
+            <div class="nav-item" id="adminUserManageContainer" style="display: none;">
+                <button id="manageUsersBtn" class="nav-btn">👤 Quản lý User</button>
+                <button id="manageRolesBtn" class="nav-btn">🛡️ Phân quyền</button>
+            </div>
+            <div class="nav-item">
+                <button id="loginBtn" class="nav-btn">Đăng nhập</button>
+            </div>
+            <div class="nav-item user-info" style="display: none;">
+                <span id="headerUsername" class="username"></span>
+                <button id="logoutBtn" title="Đăng xuất" class="logout-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                </button>
+            </div>
+        </nav>
+    </header>
+    <div id="map"></div>
+
+    <div id="miniMap" class="mini-map-container"></div>
+
+    <div class="footer" id="coord">Vĩ độ: 0 | Kinh độ: 0 | Tỉ lệ phóng: 0</div>
+    <div id="controlPopup" class="popup">
+        <div class="popup-content">
+            <span id="closePopup">×</span>
+            <h2>Điều khiển</h2>
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="Tìm kiếm vị trí...">
+                <button onclick="searchLocation()">Tìm</button>
+            </div>
+            <div class="control-buttons">
+                <button onclick="toggleWeather()" class="control-btn">🌤️ Bật/tắt thời tiết</button>
+                <button onclick="addLayer()" class="control-btn">📊 Thêm lớp</button>
+                <button onclick="goToMap()" class="control-btn">🗺️ Trở về</button>
+                <button id="toggleDraw" class="control-btn">✏️ Bật vẽ đa giác</button>
+            </div>
+
+            <div class="query-container">
+                <label for="dataTypeSelect">Chọn loại dữ liệu:</label>
+                <select id="dataTypeSelect">
+                    <option value="satlo">Sạt lở</option>
+                    <option value="debao">Đê bao</option>
+                    <!-- Thêm các loại khác nếu cần -->
+                </select>
+                <button onclick="queryData()" class="query-btn">🔍 Truy vấn</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup đăng nhập -->
+    <div id="loginPopup" class="popup">
+        <div class="popup-content">
+            <span id="closeLoginPopup">×</span>
+            <h2>Đăng nhập</h2>
+            <form id="loginForm">
+                <div class="input-group">
+                    <input type="text" id="username" placeholder="Tên đăng nhập" required>
+                    <div class="input-icon">👤</div>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="Mật khẩu" required>
+                    <div class="input-icon">🔒</div>
+                </div>
+                <button type="submit" id="loginSubmitBtn">
+                    <span class="btn-text">Đăng nhập</span>
+                    <span class="btn-loading" style="display: none;">⏳</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="sutlun-table-container" class="data-table-container">
+        <!-- Resize handles -->
+        <div class="resize-handle n"></div>
+        <div class="resize-handle s"></div>
+        <div class="resize-handle e"></div>
+        <div class="resize-handle w"></div>
+        <div class="resize-handle ne"></div>
+        <div class="resize-handle nw"></div>
+        <div class="resize-handle se"></div>
+        <div class="resize-handle sw"></div>
+
+        <div id="sutlun-table-header" class="data-table-header">
+            <div class="data-table-title-container">
+                <h4 class="data-table-title">📊 Bảng dữ liệu Sụt lún</h4>
+                <button onclick="closeSutLunTable()" class="data-table-close-btn">✕</button>
+            </div>
+            <div class="data-table-controls">
+                <div class="data-table-actions">
+                    <div class="data-table-search-section">
+                        <input type="text" id="sutlun-search-input" placeholder="Tìm kiếm..."
+                            class="data-table-search-input">
+                        <button onclick="searchSutLunData()" class="data-table-search-btn">🔍</button>
+                    </div>
+                    <button onclick="addSutLunRecord()" class="data-table-action-btn add-btn">➕ Thêm</button>
+                    <button onclick="editSutLunRecord()" class="data-table-action-btn edit-btn" disabled>✏️ Sửa</button>
+                    <button onclick="deleteSutLunRecord()" class="data-table-action-btn delete-btn" disabled>🗑️
+                        Xóa</button>
+                </div>
+                <div class="data-table-pagination-controls">
+                    <label for="sutlun-pageSize" class="data-table-label">Số dòng hiển thị:</label>
+                    <input type="number" id="sutlun-pageSize" value="100" min="1" max="10000"
+                        class="data-table-page-size">
+                    <button onclick="updateSutLunData()" class="data-table-update-btn">Cập nhật</button>
+                </div>
+            </div>
+        </div>
+        <div class="data-table-content">
+            <table id="sutlun-table" class="data-table">
+                <thead>
+                    <tr>
+                        <th>ObjectID</th>
+                        <th>ID</th>
+                        <th>Vận tốc TB</th>
+                        <th>Vận tốc SD</th>
+                        <th>Vận tốc tích lũy</th>
+                        <th>Thời gian</th>
+                        <th>Tọa độ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dữ liệu sẽ được thêm ở đây -->
+                </tbody>
+            </table>
+            <div id="sutlun-pagination" class="data-table-pagination"></div>
+        </div>
+    </div>
+
+    <div id="cong-table-container" class="data-table-container">
+        <!-- Resize handles -->
+        <div class="resize-handle n"></div>
+        <div class="resize-handle s"></div>
+        <div class="resize-handle e"></div>
+        <div class="resize-handle w"></div>
+        <div class="resize-handle ne"></div>
+        <div class="resize-handle nw"></div>
+        <div class="resize-handle se"></div>
+        <div class="resize-handle sw"></div>
+
+        <div id="cong-table-header" class="data-table-header">
+            <div class="data-table-title-container">
+                <h4 class="data-table-title">📊 Bảng dữ liệu Cống</h4>
+                <button onclick="closeCongTable()" class="data-table-close-btn">✕</button>
+            </div>
+            <div class="data-table-controls">
+                <div class="data-table-search-section">
+                    <input type="text" id="cong-search-input"
+                        placeholder="Tìm kiếm theo tên, ID hoặc tọa độ (lat, lng, radius)..."
+                        class="data-table-search-input">
+                    <button onclick="searchCongData()" class="data-table-search-btn">🔍</button>
+                </div>
+                <div class="data-table-actions">
+                    <button onclick="addCongRecord()" class="data-table-action-btn add-btn">➕ Thêm</button>
+                    <button onclick="editCongRecord()" class="data-table-action-btn edit-btn" disabled>✏️ Sửa</button>
+                    <button onclick="deleteCongRecord()" class="data-table-action-btn delete-btn" disabled>🗑️
+                        Xóa</button>
+                    <!-- <button onclick="backupCongData()" class="data-table-action-btn backup-btn">💾 Backup data</button> -->
+                </div>
+                <div class="data-table-pagination-controls">
+                    <label for="cong-pageSize" class="data-table-label">Số dòng hiển thị:</label>
+                    <input type="number" id="cong-pageSize" value="100" min="1" max="10000"
+                        class="data-table-page-size">
+                    <button onclick="updateCongData()" class="data-table-update-btn">Cập nhật</button>
+                </div>
+            </div>
+        </div>
+        <div class="data-table-content">
+            <table id="cong-table" class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên cống</th>
+                        <th>Cấp</th>
+                        <th>Năm xây dựng</th>
+                        <th>Tên xã</th>
+                        <th>Số phai</th>
+                        <th>Bề khoảng (m)</th>
+                        <th>Tổng cửa</th>
+                        <th>Ghi chú</th>
+                        <th>Mã cống</th>
+                        <th>Cao trình đáy</th>
+                        <th>Tên chung</th>
+                        <th>Tên riêng</th>
+                        <th>Tọa độ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dữ liệu sẽ được thêm ở đây -->
+                </tbody>
+            </table>
+            <div id="cong-pagination" class="data-table-pagination"></div>
+        </div>
+    </div>
+
+    <div id="chatluong-table-container" class="data-table-container">
+        <!-- Resize handles -->
+        <div class="resize-handle n"></div>
+        <div class="resize-handle s"></div>
+        <div class="resize-handle e"></div>
+        <div class="resize-handle w"></div>
+        <div class="resize-handle ne"></div>
+        <div class="resize-handle nw"></div>
+        <div class="resize-handle se"></div>
+        <div class="resize-handle sw"></div>
+
+        <div id="chatluong-table-header" class="data-table-header">
+            <div class="data-table-title-container">
+                <h4 class="data-table-title">📊 Bảng dữ liệu Chất lượng</h4>
+                <button onclick="closeChatLuongTable()" class="data-table-close-btn">✕</button>
+            </div>
+            <div class="data-table-controls">
+                <div class="data-table-actions">
+                    <div class="data-table-search-section">
+                        <input type="text" id="chatluong-search-input" placeholder="Tìm kiếm..."
+                            class="data-table-search-input">
+                        <button onclick="searchChatLuongData()" class="data-table-search-btn">🔍</button>
+                    </div>
+                    <button onclick="addChatLuongRecord()" class="data-table-action-btn add-btn">➕ Thêm</button>
+                    <button onclick="editChatLuongRecord()" class="data-table-action-btn edit-btn" disabled>✏️
+                        Sửa</button>
+                    <button onclick="deleteChatLuongRecord()" class="data-table-action-btn delete-btn" disabled>🗑️
+                        Xóa</button>
+                </div>
+                <div class="data-table-pagination-controls">
+                    <label for="chatluong-pageSize" class="data-table-label">Số dòng hiển thị:</label>
+                    <input type="number" id="chatluong-pageSize" value="100" min="1" max="10000"
+                        class="data-table-page-size">
+                    <button onclick="updateChatLuongData()" class="data-table-update-btn">Cập nhật</button>
+                </div>
+            </div>
+        </div>
+        <div class="data-table-content">
+            <table id="chatluong-table" class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Layer</th>
+                        <th>Kml_folder</th>
+                        <th>Tọa độ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dữ liệu sẽ được thêm ở đây -->
+                </tbody>
+            </table>
+            <div id="chatluong-pagination" class="data-table-pagination"></div>
+        </div>
+    </div>
+
+    <div id="debao-table-container" class="data-table-container">
+        <!-- Resize handles -->
+        <div class="resize-handle n"></div>
+        <div class="resize-handle s"></div>
+        <div class="resize-handle e"></div>
+        <div class="resize-handle w"></div>
+        <div class="resize-handle ne"></div>
+        <div class="resize-handle nw"></div>
+        <div class="resize-handle se"></div>
+        <div class="resize-handle sw"></div>
+
+        <div id="debao-table-header" class="data-table-header">
+            <div class="data-table-title-container">
+                <h4 class="data-table-title">📊 Bảng dữ liệu Đê bao</h4>
+                <button onclick="closeDeBaoTable()" class="data-table-close-btn">✕</button>
+            </div>
+            <div class="data-table-controls">
+                <div class="data-table-actions">
+                    <div class="data-table-search-section">
+                        <input type="text" id="debao-search-input" placeholder="Tìm kiếm..."
+                            class="data-table-search-input">
+                        <button onclick="searchDeBaoData()" class="data-table-search-btn">🔍</button>
+                    </div>
+                    <button onclick="addDeBaoRecord()" class="data-table-action-btn add-btn">➕ Thêm</button>
+                    <button onclick="editDeBaoRecord()" class="data-table-action-btn edit-btn" disabled>✏️ Sửa</button>
+                    <button onclick="deleteDeBaoRecord()" class="data-table-action-btn delete-btn" disabled>🗑️
+                        Xóa</button>
+                </div>
+                <div class="data-table-pagination-controls">
+                    <label for="debao-pageSize" class="data-table-label">Số dòng hiển thị:</label>
+                    <input type="number" id="debao-pageSize" value="100" min="1" max="10000"
+                        class="data-table-page-size">
+                    <button onclick="updateDeBaoData()" class="data-table-update-btn">Cập nhật</button>
+                </div>
+            </div>
+        </div>
+        <div class="data-table-content">
+            <table id="debao-table" class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Entity</th>
+                        <th>Layer</th>
+                        <th>Color</th>
+                        <th>Line Type</th>
+                        <th>Elevation</th>
+                        <th>Line Weight</th>
+                        <th>Tọa độ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dữ liệu sẽ được thêm ở đây -->
+                </tbody>
+            </table>
+            <div id="debao-pagination" class="data-table-pagination"></div>
+        </div>
+    </div>
+
+    <div id="dolun-table-container" class="data-table-container">
+        <!-- Resize handles -->
+        <div class="resize-handle n"></div>
+        <div class="resize-handle s"></div>
+        <div class="resize-handle e"></div>
+        <div class="resize-handle w"></div>
+        <div class="resize-handle ne"></div>
+        <div class="resize-handle nw"></div>
+        <div class="resize-handle se"></div>
+        <div class="resize-handle sw"></div>
+
+        <div id="dolun-table-header" class="data-table-header">
+            <div class="data-table-title-container">
+                <h4 class="data-table-title">📊 Bảng dữ liệu Độ lún</h4>
+                <button onclick="closeDoLunTable()" class="data-table-close-btn">✕</button>
+            </div>
+            <div class="data-table-controls">
+                <div class="data-table-actions">
+                    <div class="data-table-search-section">
+                        <input type="text" id="dolun-search-input" placeholder="Tìm kiếm..."
+                            class="data-table-search-input">
+                        <button onclick="searchDoLunData()" class="data-table-search-btn">🔍</button>
+                    </div>
+                    <button onclick="addDoLunRecord()" class="data-table-action-btn add-btn">➕ Thêm</button>
+                    <button onclick="editDoLunRecord()" class="data-table-action-btn edit-btn" disabled>✏️ Sửa</button>
+                    <button onclick="deleteDoLunRecord()" class="data-table-action-btn delete-btn" disabled>🗑️
+                        Xóa</button>
+                </div>
+                <div class="data-table-pagination-controls">
+                    <label for="dolun-pageSize" class="data-table-label">Số dòng hiển thị:</label>
+                    <input type="number" id="dolun-pageSize" value="100" min="1" max="10000"
+                        class="data-table-page-size">
+                    <button onclick="updateDoLunData()" class="data-table-update-btn">Cập nhật</button>
+                </div>
+            </div>
+        </div>
+        <div class="data-table-content">
+            <table id="dolun-table" class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Grid Code</th>
+                        <th>Shape Area</th>
+                        <th>Layer</th>
+                        <th>Tọa độ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dữ liệu sẽ được thêm ở đây -->
+                </tbody>
+            </table>
+            <div id="dolun-pagination" class="data-table-pagination"></div>
+        </div>
+    </div>
+
+    <div id="hientrang-table-container" class="data-table-container">
+        <!-- Resize handles -->
+        <div class="resize-handle n"></div>
+        <div class="resize-handle s"></div>
+        <div class="resize-handle e"></div>
+        <div class="resize-handle w"></div>
+        <div class="resize-handle ne"></div>
+        <div class="resize-handle nw"></div>
+        <div class="resize-handle se"></div>
+        <div class="resize-handle sw"></div>
+
+        <div id="hientrang-table-header" class="data-table-header">
+            <div class="data-table-title-container">
+                <h4 class="data-table-title">📊 Bảng dữ liệu Hiện trạng</h4>
+                <button onclick="closeHienTrangTable()" class="data-table-close-btn">✕</button>
+            </div>
+            <div class="data-table-controls">
+                <div class="data-table-actions">
+                    <div class="data-table-search-section">
+                        <input type="text" id="hientrang-search-input" placeholder="Tìm kiếm..."
+                            class="data-table-search-input">
+                        <button onclick="searchHienTrangData()" class="data-table-search-btn">🔍</button>
+                    </div>
+                    <button onclick="addHienTrangRecord()" class="data-table-action-btn add-btn">➕ Thêm</button>
+                    <button onclick="editHienTrangRecord()" class="data-table-action-btn edit-btn" disabled>✏️
+                        Sửa</button>
+                    <button onclick="deleteHienTrangRecord()" class="data-table-action-btn delete-btn" disabled>🗑️
+                        Xóa</button>
+                </div>
+                <div class="data-table-pagination-controls">
+                    <label for="hientrang-pageSize" class="data-table-label">Số dòng hiển thị:</label>
+                    <input type="number" id="hientrang-pageSize" value="100" min="1" max="10000"
+                        class="data-table-page-size">
+                    <button onclick="updateHienTrangData()" class="data-table-update-btn">Cập nhật</button>
+                </div>
+            </div>
+        </div>
+        <div class="data-table-content">
+            <table id="hientrang-table" class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Layer</th>
+                        <th>GM_TYPE</th>
+                        <th>KML_STYLE</th>
+                        <th>KML_FOLDER</th>
+                        <th>Tuyến</th>
+                        <th>Tọa độ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dữ liệu sẽ được thêm ở đây -->
+                </tbody>
+            </table>
+            <div id="hientrang-pagination" class="data-table-pagination"></div>
+        </div>
+    </div>
+
+    <!-- Bảng dữ liệu Ngập lụt -->
+    <div id="ngaplut-table-container" class="data-table-container" style="display: none;">
+        <!-- Resize handles -->
+        <div class="resize-handle n"></div>
+        <div class="resize-handle s"></div>
+        <div class="resize-handle e"></div>
+        <div class="resize-handle w"></div>
+        <div class="resize-handle ne"></div>
+        <div class="resize-handle nw"></div>
+        <div class="resize-handle se"></div>
+        <div class="resize-handle sw"></div>
+
+        <div id="ngaplut-table-header" class="data-table-header">
+            <div class="data-table-title-container">
+                <h4 class="data-table-title">📊 Bảng dữ liệu Ngập lụt</h4>
+                <button onclick="closeNgaplutTable()" class="data-table-close-btn">✕</button>
+            </div>
+            <div class="data-table-controls">
+                <div class="data-table-actions">
+                    <div class="data-table-search-section">
+                        <input type="text" id="ngaplut-search-input" placeholder="Tìm kiếm..."
+                            class="data-table-search-input">
+                        <button onclick="searchNgaplutData()" class="data-table-search-btn">🔍</button>
+                    </div>
+                    <button onclick="addNgaplutRecord()" class="data-table-action-btn add-btn">➕ Thêm</button>
+                    <button onclick="editNgaplutRecord()" class="data-table-action-btn edit-btn" disabled>✏️
+                        Sửa</button>
+                    <button onclick="deleteNgaplutRecord()" class="data-table-action-btn delete-btn" disabled>🗑️
+                        Xóa</button>
+                </div>
+                <div class="data-table-pagination-controls">
+                    <label for="ngaplut-pageSize" class="data-table-label">Số dòng hiển thị:</label>
+                    <input type="number" id="ngaplut-pageSize" value="100" min="1" max="100000"
+                        class="data-table-page-size">
+                    <button onclick="updateNgaplutData()" class="data-table-update-btn">Cập nhật</button>
+                </div>
+            </div>
+        </div>
+        <div class="data-table-content">
+            <table id="ngaplut-table" class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Giá trị trung bình</th>
+                        <th>Chiều dài (m)</th>
+                        <th>Diện tích (m²)</th>
+                        <th>Lớp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dữ liệu sẽ được thêm ở đây -->
+                </tbody>
+            </table>
+            <div id="ngaplut-pagination" class="data-table-pagination"></div>
+        </div>
+    </div>
+
+    <!-- Bảng dữ liệu Điểm khảo sát -->
+    <div id="khaosat-table-container" class="data-table-container" style="display: none;">
+        <!-- Resize handles -->
+        <div class="resize-handle n"></div>
+        <div class="resize-handle s"></div>
+        <div class="resize-handle e"></div>
+        <div class="resize-handle w"></div>
+        <div class="resize-handle ne"></div>
+        <div class="resize-handle nw"></div>
+        <div class="resize-handle se"></div>
+        <div class="resize-handle sw"></div>
+
+        <div id="khaosat-table-header" class="data-table-header">
+            <div class="data-table-title-container">
+                <h4 class="data-table-title">📊 Bảng dữ liệu Điểm khảo sát</h4>
+                <button onclick="closeKhaoSatTable()" class="data-table-close-btn">✕</button>
+            </div>
+            <div class="data-table-controls">
+                <div class="data-table-search-section">
+                    <input type="text" id="khaosat-search-input"
+                        placeholder="Tìm kiếm theo tên, ID hoặc tọa độ (lat, lng, radius)..."
+                        class="data-table-search-input">
+                    <button onclick="searchKhaoSatData()" class="data-table-search-btn">🔍</button>
+                </div>
+                <div class="data-table-actions">
+                    <button onclick="addKhaoSatRecord()" class="data-table-action-btn add-btn">➕ Thêm</button>
+                    <button onclick="editKhaoSatRecord()" class="data-table-action-btn edit-btn" disabled>✏️
+                        Sửa</button>
+                    <button onclick="deleteKhaoSatRecord()" class="data-table-action-btn delete-btn" disabled>🗑️
+                        Xóa</button>
+                </div>
+                <div class="data-table-pagination-controls">
+                    <label for="khaosat-pageSize" class="data-table-label">Số dòng hiển thị:</label>
+                    <input type="number" id="khaosat-pageSize" value="100" min="1" max="10000"
+                        class="data-table-page-size">
+                    <button onclick="updateKhaoSatData()" class="data-table-update-btn">Cập nhật</button>
+                </div>
+            </div>
+        </div>
+        <div class="data-table-content">
+            <table id="khaosat-table" class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên điểm</th>
+                        <th>Vĩ độ</th>
+                        <th>Kinh độ</th>
+                        <th>Hình ảnh</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dữ liệu sẽ được thêm ở đây -->
+                </tbody>
+            </table>
+            <div id="khaosat-pagination" class="data-table-pagination"></div>
+        </div>
+    </div>
+
+    <div id="user-table-container" class="data-table-container" style="display: none;">
+        <div class="resize-handle n"></div>
+        <div class="resize-handle s"></div>
+        <div class="resize-handle e"></div>
+        <div class="resize-handle w"></div>
+        <div class="resize-handle ne"></div>
+        <div class="resize-handle nw"></div>
+        <div class="resize-handle se"></div>
+        <div class="resize-handle sw"></div>
+
+        <div id="user-table-header" class="data-table-header">
+            <div class="data-table-title-container">
+                <h4 class="data-table-title">📊 Bảng Users</h4>
+                <button onclick="window.closeUserTable()" class="data-table-close-btn">✕</button>
+            </div>
+            <div class="data-table-controls">
+                <div class="data-table-actions">
+                    <div class="data-table-search-section">
+                        <input type="text" id="user-search-input" placeholder="Tìm kiếm..."
+                            class="data-table-search-input">
+                        <button onclick="window.searchUserData()" class="data-table-search-btn">🔍</button>
+                    </div>
+                    <button onclick="window.addUserRecord()" class="data-table-action-btn add-btn">➕ Thêm</button>
+                    <button onclick="window.editUserRecord()" class="data-table-action-btn edit-btn" disabled>✏️
+                        Sửa</button>
+                </div>
+            </div>
+        </div>
+        <div class="data-table-content">
+            <table id="user-table" class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên đăng nhập</th>
+                        <th>Role</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <div id="user-pagination" class="data-table-pagination"></div>
+        </div>
+    </div>
+
+    <!-- Widget thời tiết -->
+    <div id="weatherWidget" class="weather-widget" style="display: none;">
+        <div class="weather-bg" id="weatherBg"></div>
+        <div class="weather-content">
+            <div class="weather-header">
+                <select id="provinceSelect" onchange="fetchWeather()"></select>
+            </div>
+            <div class="weather-time-container">
+                <span id="weatherTime">--</span>
+            </div>
+            <div class="weather-today">
+                <div class="weather-icon-large" id="weatherIconMain">🌤️</div>
+                <div class="weather-temp" id="weatherTempMain">--°C</div>
+                <div class="weather-desc" id="weatherDescMain">--</div>
+            </div>
+            <div class="weather-forecast" id="weatherForecast"></div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <script src="weather.js"></script>
+    <script src="weather-drag.js"></script>
+    <script src="main.js"></script>
+    <script src="login/login.js"></script>
+    <script src="layers/layer_cong.js"></script>
+    <script src="layers/layer_chatluong.js"></script>
+    <script src="layers/layer_debao.js"></script>
+    <script src="layers/layer_dolun.js"></script>
+    <script src="layers/layer_hientrang.js"></script>
+    <script src="layers/layer_sutlun.js"></script>
+    <script src="layers/layer_ngaplut.js"></script>
+    <script src="layers/layer_khaosat.js"></script>
+    <script src="tables/table_sutlun.js"></script>
+    <script src="tables/table_cong.js"></script>
+    <script src="tables/table_chatluong.js"></script>
+    <script src="tables/table_debao.js"></script>
+    <script src="tables/table_dolun.js"></script>
+    <script src="tables/table_hientrang.js"></script>
+    <script src="tables/table_ngaplut.js"></script>
+    <script src="tables/table_khaosat.js"></script>
+    <script src="tables/table_user.js"></script>
+    <script src="tables/table_roles.js"></script>
+    <script>
+        // Khởi tạo table sụt lún, cống, chất lượng, đê bao, độ lún, hiện trạng và ngập lụt sau khi tất cả script đã load
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof window.initSutLunTable === 'function') {
+                window.initSutLunTable();
+            }
+            if (typeof window.initCongTable === 'function') {
+                window.initCongTable();
+            }
+            if (typeof window.initChatLuongTable === 'function') {
+                window.initChatLuongTable();
+            }
+            if (typeof window.initDeBaoTable === 'function') {
+                window.initDeBaoTable();
+            }
+            if (typeof window.initDoLunTable === 'function') {
+                window.initDoLunTable();
+            }
+            if (typeof window.initHienTrangTable === 'function') {
+                window.initHienTrangTable();
+            }
+            if (typeof window.initNgaplutTable === 'function') {
+                window.initNgaplutTable();
+            }
+            if (typeof window.initKhaoSatTable === 'function') {
+                window.initKhaoSatTable();
+            }
+            if (typeof window.initUserTable === 'function') {
+                window.initUserTable();
+            }
+        });
+    </script>
+</body>
+
+</html>

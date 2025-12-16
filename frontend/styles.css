@@ -1,0 +1,608 @@
+/* Reset và base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f5f5f5;
+    overflow: hidden;
+}
+
+/* Header styles */
+.main-header {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 1000;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.header-left h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+}
+
+/* Navigation styles */
+.header-nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-item {
+    position: relative;
+}
+
+/* Container cho admin buttons */
+#adminUserManageContainer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.dropdown-toggle {
+    position: relative;
+}
+
+.dropdown-arrow {
+    font-size: 12px;
+    transition: transform 0.3s ease;
+}
+
+.dropdown.active .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+/* Dropdown menu styles */
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    min-width: 250px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 1001;
+    margin-top: 5px;
+}
+
+.dropdown.active .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.dropdown-item.active {
+    background-color: #e3f2fd;
+    color: #1976d2;
+    border-left: 4px solid #1976d2;
+    font-weight: 600;
+}
+
+.layer-name {
+    font-weight: 500;
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+.dropdown-item.active .layer-name {
+    color: #1976d2;
+    font-weight: 600;
+}
+
+/* Thêm hiệu ứng hover cho dropdown item */
+.dropdown-item:hover:not(.active) {
+    background-color: #f8f9fa;
+    transform: translateX(2px);
+    transition: all 0.2s ease;
+}
+
+/* Table toggle button in dropdown */
+.table-toggle-btn {
+    background: #f0f0f0;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.table-toggle-btn:hover:not(:disabled) {
+    background: #e0e0e0;
+}
+
+.table-toggle-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* User info styles */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+}
+
+.username {
+    color: white;
+    font-weight: 500;
+}
+
+.logout-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: white;
+    padding: 5px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.logout-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Avatar styles removed - no longer needed */
+
+/* Map container */
+#map {
+    height: calc(100vh - 80px);
+    width: 100%;
+    z-index: 1;
+}
+
+/* Mini map styles */
+.mini-map-container {
+    position: absolute;
+    bottom: 60px;
+    left: 20px;
+    width: 220px;
+    /* Giảm chiều rộng từ 250px xuống 220px */
+    height: 200px;
+    /* Tăng chiều cao từ 180px lên 200px */
+    border: 2px solid #333;
+    border-radius: 8px;
+    z-index: 1000;
+    background: white;
+}
+
+/* Footer */
+.footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 20px;
+    font-size: 12px;
+    text-align: center;
+    z-index: 1000;
+}
+
+/* Popup styles */
+.popup {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Popup content styles - Overridden by login-popup.css for login popup */
+.popup-content:not(#loginPopup .popup-content) {
+    background-color: white;
+    margin: 10% auto;
+    padding: 30px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.popup-content:not(#loginPopup .popup-content) h2 {
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+}
+
+.popup-content:not(#loginPopup .popup-content) span {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #999;
+}
+
+.popup-content:not(#loginPopup .popup-content) span:hover {
+    color: #333;
+}
+
+/* Form styles */
+.popup-content:not(#loginPopup .popup-content) input,
+.popup-content:not(#loginPopup .popup-content) select {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.popup-content:not(#loginPopup .popup-content) button {
+    background: #2a5298;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    margin: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.popup-content:not(#loginPopup .popup-content) button:hover {
+    background: #1e3c72;
+}
+
+/* Search container */
+.search-container {
+    margin: 20px 0;
+    display: flex;
+    gap: 10px;
+}
+
+.search-container input {
+    flex: 1;
+}
+
+.search-container button {
+    white-space: nowrap;
+}
+
+/* Query container */
+.query-container {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.query-container label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+}
+
+/* Weather widget styles */
+.weather-widget {
+    position: fixed;
+    top: 50%;
+    left: 20px;
+    width: 280px;
+    /* Giảm chiều rộng từ 320px xuống 280px */
+    background: none;
+    /* Loại bỏ background cũ */
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    z-index: 1000;
+    display: none;
+    /* Mặc định ẩn */
+    cursor: move;
+    /* Thêm cursor move */
+    transition: box-shadow 0.3s ease;
+    user-select: none;
+    /* Ngăn select text khi drag */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+
+}
+
+.weather-widget.dragging {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+    transform: scale(1.02);
+}
+
+.weather-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 16px;
+    z-index: 1;
+    filter: blur(3px);
+}
+
+.weather-content {
+    padding: 20px;
+    background: transparent;
+    color: white;
+    position: relative;
+    z-index: 2;
+}
+
+/* Overlay mờ đè lên ảnh */
+.weather-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    /* Thay đổi từ gradient tím sang overlay mờ đơn giản */
+    z-index: -1;
+    border-radius: 16px;
+}
+
+.weather-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+    user-select: none;
+    /* Ngăn select text khi drag */
+    transition: all 0.2s ease;
+    border-radius: 6px;
+    padding: 4px;
+    margin: -4px 0 10px -4px;
+    color: white;
+}
+
+.weather-header:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    /* Giữ nguyên padding và margin để tránh thay đổi kích thước */
+}
+
+.weather-header select {
+    padding: 8px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    font-size: 13px;
+    background: rgba(255, 255, 255, 0.9);
+    user-select: auto;
+    /* Cho phép select text trong dropdown */
+    cursor: pointer;
+    /* Cursor pointer cho dropdown */
+    color: #333;
+    font-weight: 500;
+}
+
+.weather-time-container {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.weather-time {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.8);
+    display: block;
+}
+
+.weather-today {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.weather-icon-large {
+    font-size: 48px;
+    margin-bottom: 10px;
+    color: white;
+}
+
+.weather-temp {
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 5px;
+}
+
+.weather-desc {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.weather-forecast {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.forecast-day {
+    text-align: center;
+    flex: 1;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.forecast-day>div:first-child {
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: white;
+}
+
+.forecast-icon {
+    font-size: 24px;
+    margin: 5px 0;
+    color: white;
+}
+
+.forecast-day>div:last-child {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+}
+
+/* Data table styles - Moved to tables.css for better organization */
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .main-header {
+        padding: 10px 15px;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .header-left h1 {
+        font-size: 1.2rem;
+    }
+
+    .header-nav {
+        gap: 10px;
+    }
+
+    .nav-btn {
+        padding: 8px 15px;
+        font-size: 13px;
+    }
+
+    .dropdown-menu {
+        min-width: 200px;
+        right: -50px;
+    }
+
+    .mini-map-container {
+        width: 160px;
+        /* Giảm chiều rộng cho tablet */
+        height: 160px;
+        /* Tăng chiều cao cho tablet */
+        bottom: 50px;
+        left: 10px;
+    }
+
+    .weather-widget {
+        width: 250px;
+        /* Giảm chiều rộng cho tablet */
+        left: 10px;
+    }
+
+    /* Data table responsive styles moved to tables.css */
+}
+
+@media (max-width: 480px) {
+    .header-left {
+        gap: 10px;
+    }
+
+    .logo {
+        width: 40px;
+        height: 40px;
+    }
+
+    .header-left h1 {
+        font-size: 1rem;
+    }
+
+    .nav-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    .dropdown-menu {
+        min-width: 180px;
+        right: -30px;
+    }
+
+    .weather-widget {
+        width: 240px;
+        /* Giảm chiều rộng cho mobile */
+        left: 5px;
+    }
+}
+
+/* Custom tooltip styles for survey points */
+.custom-tooltip {
+    background: rgba(0, 0, 0, 0.8);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 8px 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    max-width: 250px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.custom-tooltip::before {
+    border-top-color: rgba(0, 0, 0, 0.8);
+}

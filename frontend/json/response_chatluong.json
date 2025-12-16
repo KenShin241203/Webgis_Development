@@ -1,0 +1,955 @@
+{
+    "message": "Lấy dữ liệu từ cache",
+    "data": [
+        {
+            "id": 0,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.445209876,
+                        9.883509971
+                    ],
+                    [
+                        106.445345376,
+                        9.883216771
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 1,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.445345376,
+                        9.883216771
+                    ],
+                    [
+                        106.445502076,
+                        9.882735871
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 2,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.445502076,
+                        9.882735871
+                    ],
+                    [
+                        106.445714675,
+                        9.881785071
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 3,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.445714675,
+                        9.881785071
+                    ],
+                    [
+                        106.446272675,
+                        9.879630971
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 4,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.446272675,
+                        9.879630971
+                    ],
+                    [
+                        106.446878375,
+                        9.877256971
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 5,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.446878375,
+                        9.877256971
+                    ],
+                    [
+                        106.447505375,
+                        9.874851571
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 6,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.447505375,
+                        9.874851571
+                    ],
+                    [
+                        106.447909274,
+                        9.873129271
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 7,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.447909274,
+                        9.873129271
+                    ],
+                    [
+                        106.448686974,
+                        9.870108671
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 8,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.448686974,
+                        9.870108671
+                    ],
+                    [
+                        106.448965074,
+                        9.869064771
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 9,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.448965074,
+                        9.869064771
+                    ],
+                    [
+                        106.448942474,
+                        9.868598371
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 10,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.448942474,
+                        9.868598371
+                    ],
+                    [
+                        106.449114089,
+                        9.867892038
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 11,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.446243455,
+                        9.8676023
+                    ],
+                    [
+                        106.446174374,
+                        9.868271671
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 12,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.446174374,
+                        9.868271671
+                    ],
+                    [
+                        106.446038874,
+                        9.868766371
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 13,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.446038874,
+                        9.868766371
+                    ],
+                    [
+                        106.445494174,
+                        9.870266171
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 14,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.445494174,
+                        9.870266171
+                    ],
+                    [
+                        106.444922974,
+                        9.871909971
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 15,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.444922974,
+                        9.871909971
+                    ],
+                    [
+                        106.444176375,
+                        9.873888771
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 16,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.444176375,
+                        9.873888771
+                    ],
+                    [
+                        106.443498875,
+                        9.875768071
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 17,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.443498875,
+                        9.875768071
+                    ],
+                    [
+                        106.442683275,
+                        9.877998171
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 18,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.442683275,
+                        9.877998171
+                    ],
+                    [
+                        106.441636475,
+                        9.880298871
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 19,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.441636475,
+                        9.880298871
+                    ],
+                    [
+                        106.440494076,
+                        9.882371871
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 20,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.440494076,
+                        9.882371871
+                    ],
+                    [
+                        106.439372876,
+                        9.884510271
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 21,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.439372876,
+                        9.884510271
+                    ],
+                    [
+                        106.439173576,
+                        9.884638471
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 22,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.439173576,
+                        9.884638471
+                    ],
+                    [
+                        106.438992976,
+                        9.884790271
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 23,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.438992976,
+                        9.884790271
+                    ],
+                    [
+                        106.438889376,
+                        9.885135771
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 24,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.438889376,
+                        9.885135771
+                    ],
+                    [
+                        106.438506776,
+                        9.886447071
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 25,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.438506776,
+                        9.886447071
+                    ],
+                    [
+                        106.438249076,
+                        9.887227071
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 26,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.438249076,
+                        9.887227071
+                    ],
+                    [
+                        106.438177276,
+                        9.887601371
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 27,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.438177276,
+                        9.887601371
+                    ],
+                    [
+                        106.438639576,
+                        9.887849571
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 28,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.438639576,
+                        9.887849571
+                    ],
+                    [
+                        106.439758076,
+                        9.888564071
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 29,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.439758076,
+                        9.888564071
+                    ],
+                    [
+                        106.440382476,
+                        9.888951471
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 30,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.440382476,
+                        9.888951471
+                    ],
+                    [
+                        106.440621576,
+                        9.889027371
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 31,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.440621576,
+                        9.889027371
+                    ],
+                    [
+                        106.441033376,
+                        9.888550971
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 32,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.441033376,
+                        9.888550971
+                    ],
+                    [
+                        106.441763976,
+                        9.887750071
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 33,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.441763976,
+                        9.887750071
+                    ],
+                    [
+                        106.442369776,
+                        9.887038171
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 34,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.442369776,
+                        9.887038171
+                    ],
+                    [
+                        106.444022276,
+                        9.885221771
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 35,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.444022276,
+                        9.885221771
+                    ],
+                    [
+                        106.444984076,
+                        9.884122471
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 36,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.444984076,
+                        9.884122471
+                    ],
+                    [
+                        106.445387876,
+                        9.883706271
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 37,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.196845166,
+                        9.681985104
+                    ],
+                    [
+                        106.197012497,
+                        9.682133934
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 38,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.298756998,
+                        10.024280281
+                    ],
+                    [
+                        106.298461178,
+                        10.024013475
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 39,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.25033687,
+                        10.063568857
+                    ],
+                    [
+                        106.251076505,
+                        10.063608184
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 40,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.251076505,
+                        10.063608184
+                    ],
+                    [
+                        106.251178805,
+                        10.063608584
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 41,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.251178805,
+                        10.063608584
+                    ],
+                    [
+                        106.252089205,
+                        10.063560584
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 42,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.252089205,
+                        10.063560584
+                    ],
+                    [
+                        106.252187705,
+                        10.063556484
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 43,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.252187705,
+                        10.063556484
+                    ],
+                    [
+                        106.252287904,
+                        10.063560184
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 44,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.252287904,
+                        10.063560184
+                    ],
+                    [
+                        106.253753504,
+                        10.063666584
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 45,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.249557568,
+                        10.065419489
+                    ],
+                    [
+                        106.250808005,
+                        10.065970484
+                    ]
+                ]
+            },
+            "kind_id": 2
+        },
+        {
+            "id": 46,
+            "name": "Polyline_003",
+            "layer": "bo bao",
+            "kml_folder": "Entity Features",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        106.250808005,
+                        10.065970484
+                    ],
+                    [
+                        106.250917205,
+                        10.065996684
+                    ]
+                ]
+            },
+            "kind_id": 2
+        }
+    ],
+    "pagination": {
+        "total": 47,
+        "page": 1,
+        "pageSize": 100,
+        "totalPages": 1
+    },
+    "cache": {
+        "fromCache": true,
+        "timestamp": "2025-08-06T07:48:11.488Z"
+    }
+}

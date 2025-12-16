@@ -1,0 +1,866 @@
+/* ===== STYLES CHO BẢNG DỮ LIỆU ===== */
+
+/* Container chính của bảng */
+.data-table-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    max-width: 1200px;
+    min-width: 400px;
+    max-height: 80vh;
+    min-height: 300px;
+    background: white;
+    border: 2px solid #007bff;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    z-index: 2000;
+    display: none;
+    overflow: visible;
+    animation: tableSlideIn 0.3s ease-out;
+}
+
+@keyframes tableSlideIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -60%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+/* Resize handles */
+.data-table-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Resize corner */
+.data-table-container::after {
+    content: '';
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 15px;
+    height: 15px;
+    background: linear-gradient(-45deg, transparent 30%, #007bff 30%, #007bff 40%, transparent 40%, transparent 60%, #007bff 60%, #007bff 70%, transparent 70%);
+    cursor: nw-resize;
+    z-index: 10;
+    border-radius: 2px;
+}
+
+/* Resize handles cho các cạnh */
+.resize-handle {
+    position: absolute;
+    background: rgba(0, 123, 255, 0.1);
+    z-index: 5;
+    transition: background 0.3s ease;
+}
+
+.resize-handle:hover {
+    background: rgba(0, 123, 255, 0.3);
+}
+
+.resize-handle.n {
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 8px;
+    cursor: n-resize;
+}
+
+.resize-handle.s {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 8px;
+    cursor: s-resize;
+}
+
+.resize-handle.e {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 8px;
+    cursor: e-resize;
+}
+
+.resize-handle.w {
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 8px;
+    cursor: w-resize;
+}
+
+.resize-handle.ne {
+    top: 0;
+    right: 0;
+    width: 15px;
+    height: 15px;
+    cursor: ne-resize;
+}
+
+.resize-handle.nw {
+    top: 0;
+    left: 0;
+    width: 15px;
+    height: 15px;
+    cursor: nw-resize;
+}
+
+.resize-handle.se {
+    bottom: 0;
+    right: 0;
+    width: 15px;
+    height: 15px;
+    cursor: se-resize;
+}
+
+.resize-handle.sw {
+    bottom: 0;
+    left: 0;
+    width: 15px;
+    height: 15px;
+    cursor: sw-resize;
+}
+
+/* Header của bảng */
+.data-table-header {
+    padding: 20px;
+    border-bottom: 1px solid #e9ecef;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    cursor: move;
+    position: relative;
+    z-index: 2;
+}
+
+/* Container cho tiêu đề và nút đóng */
+.data-table-title-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+/* Tiêu đề bảng */
+.data-table-title {
+    margin: 0;
+    color: #007bff;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+/* Nút đóng bảng */
+.data-table-close-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.data-table-close-btn:hover {
+    background: #c82333;
+    transform: scale(1.05);
+}
+
+/* Container cho controls */
+.data-table-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+/* Section tìm kiếm */
+.data-table-search-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Input tìm kiếm */
+.data-table-search-input {
+    width: 200px;
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.data-table-search-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+/* Nút tìm kiếm */
+.data-table-search-btn {
+    background: #17a2b8;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.data-table-search-btn:hover {
+    background: #138496;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+}
+
+/* Section actions */
+.data-table-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Nút action chung */
+.data-table-action-btn {
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.data-table-action-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.data-table-action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Nút thêm */
+.data-table-action-btn.add-btn {
+    background: #28a745;
+    color: white;
+}
+
+.data-table-action-btn.add-btn:hover:not(:disabled) {
+    background: #218838;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+/* Nút sửa */
+.data-table-action-btn.edit-btn {
+    background: #ffc107;
+    color: #212529;
+}
+
+.data-table-action-btn.edit-btn:hover:not(:disabled) {
+    background: #e0a800;
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+}
+
+/* Nút xóa */
+.data-table-action-btn.delete-btn {
+    background: #dc3545;
+    color: white;
+}
+
+.data-table-action-btn.delete-btn:hover:not(:disabled) {
+    background: #c82333;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+/* Nút backup */
+.data-table-action-btn.backup-btn {
+    background: #6f42c1;
+    color: white;
+}
+
+.data-table-action-btn.backup-btn:hover:not(:disabled) {
+    background: #5a32a3;
+    box-shadow: 0 4px 12px rgba(111, 66, 193, 0.3);
+}
+
+/* Section pagination controls */
+.data-table-pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Label cho input */
+.data-table-label {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Input số dòng */
+.data-table-page-size {
+    width: 100px;
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.data-table-page-size:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+/* Nút cập nhật */
+.data-table-update-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.data-table-update-btn:hover {
+    background: #218838;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+/* Container cho bảng */
+.data-table-content {
+    max-height: calc(80vh - 120px);
+    overflow-y: auto;
+    overflow-x: auto;
+    background: white;
+    position: relative;
+    z-index: 2;
+    margin-bottom: 8px;
+    /* Tạo khoảng trống cho thanh scroll */
+    border-radius: 0 0 10px 10px;
+    /* Bo góc dưới */
+}
+
+/* Bảng dữ liệu */
+.data-table {
+    width: 100%;
+    min-width: 800px;
+    border-collapse: collapse;
+    font-size: 14px;
+    margin-bottom: 0;
+    /* Loại bỏ margin bottom */
+}
+
+/* Đảm bảo thanh scroll hiển thị */
+.data-table-content::-webkit-scrollbar {
+    height: 12px;
+    width: 12px;
+}
+
+.data-table-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 6px;
+}
+
+.data-table-content::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 6px;
+}
+
+.data-table-content::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Header của bảng */
+.data-table thead {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+
+
+/* Các cột header */
+.data-table th {
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+    border: 1px solid #0056b3;
+    font-size: 14px;
+}
+
+/* Body của bảng */
+.data-table tbody {
+    background: white;
+}
+
+/* Dòng được chọn */
+.data-table tbody tr.selected-row {
+    background: #e3f2fd !important;
+    border-left: 4px solid #007bff;
+}
+
+.data-table tbody tr:hover {
+    background: #f8f9fa;
+    cursor: pointer;
+}
+
+.data-table tbody tr.selected-row:hover {
+    background: #e3f2fd !important;
+}
+
+/* Các dòng dữ liệu */
+.data-table td {
+    padding: 12px 15px;
+    border: 1px solid #e9ecef;
+    text-align: left;
+    font-size: 14px;
+}
+
+/* Hover effect cho dòng */
+.data-table tbody tr:hover {
+    background-color: #f8f9fa;
+    transform: scale(1.001);
+    transition: all 0.2s ease;
+}
+
+/* Pagination styles */
+.data-table-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    gap: 10px;
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+}
+
+.data-table-pagination button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.data-table-pagination button:hover:not(:disabled) {
+    background: #0056b3;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+}
+
+.data-table-pagination button:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.data-table-pagination span {
+    font-size: 14px;
+    font-weight: 500;
+    color: #495057;
+}
+
+
+
+/* Nút toggle bảng dữ liệu */
+.table-toggle-btn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-left: 10px;
+    font-size: 12px;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.table-toggle-btn:enabled {
+    background: #007bff;
+    opacity: 1;
+    cursor: pointer;
+}
+
+.table-toggle-btn:enabled:hover {
+    background: #0056b3;
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+}
+
+.table-toggle-btn:disabled {
+    background: #6c757d;
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Responsive cho màn hình nhỏ */
+@media (max-width: 768px) {
+    .data-table-container {
+        width: 95%;
+        max-height: 90vh;
+        margin: 10px;
+        min-width: 300px;
+    }
+
+    .data-table-title {
+        font-size: 16px;
+    }
+
+    .data-table-controls {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .data-table-page-size {
+        width: 100%;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .data-table-container {
+        width: 98%;
+        max-height: 95vh;
+        min-width: 250px;
+    }
+
+    .data-table-header {
+        padding: 15px;
+    }
+
+    .data-table-title {
+        font-size: 14px;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+}
+
+/* ===== MODAL STYLES ===== */
+
+/* Modal overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 3000;
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Modal content */
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Modal header */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #e9ecef;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px 12px 0 0;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #007bff;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.modal-close {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+    background: #c82333;
+    transform: scale(1.1);
+}
+
+/* Modal form */
+.modal-form {
+    padding: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #333;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-group select {
+    width: 100%;
+    padding: 10px 36px 10px 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: #fff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px 16px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-group select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.form-group select:hover {
+    border-color: #cfcfcf;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Form actions */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e9ecef;
+}
+
+.btn-cancel {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+}
+
+.btn-submit {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-submit:hover {
+    background: #218838;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+/* Responsive cho modal */
+/* Permissions grid styles */
+.permissions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #f9f9f9;
+}
+
+.perm-section {
+    background: white;
+    padding: 15px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.perm-title {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #007bff;
+    font-size: 14px;
+}
+
+.perm-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.perm-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    font-size: 13px;
+}
+
+.perm-item:hover {
+    background-color: #f0f8ff;
+}
+
+.perm-item input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+}
+
+.perm-item input[type="checkbox"]:checked+* {
+    color: #007bff;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        max-height: 95vh;
+    }
+
+    .modal-header {
+        padding: 15px;
+    }
+
+    .modal-form {
+        padding: 15px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .btn-cancel,
+    .btn-submit {
+        width: 100%;
+    }
+}
