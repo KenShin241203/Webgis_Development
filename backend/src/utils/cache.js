@@ -4,7 +4,29 @@ const Redis = require('ioredis');
 // Kết nối Redis (cấu hình qua biến môi trường)
 const redis = new Redis({
     host: process.env.REDIS_HOST || '127.0.0.1',
-    port: parseInt(process.env.REDIS_PORT || '6379', 10)
+    port: parseInt(process.env.REDIS_PORT || '6379', 10),
+    retryStrategy: (times) => {
+        // Retry với exponential backoff
+        const delay = Math.min(times * 50, 2000);
+        return delay;
+    },
+    maxRetriesPerRequest: 3,
+    lazyConnect: false,
+    enableOfflineQueue: false
+});
+
+// Xử lý lỗi Redis connection
+redis.on('error', (err) => {
+    console.error('❌ Redis connection error:', err.message);
+    // Không throw error để app vẫn chạy được khi Redis down
+});
+
+redis.on('connect', () => {
+    console.log('✅ Redis connected');
+});
+
+redis.on('ready', () => {
+    console.log('✅ Redis ready');
 });
 
 // Cache keys
@@ -26,7 +48,11 @@ const CACHE_KEYS = {
     NAGPLUT_TIMESTAMP: 'ngaplut_timestamp',
     NAGPLUT_TOTAL: 'ngaplut_total',
     KHAOSAT_ALL: 'khaosat_data_all',
-    KHAOSAT_TIMESTAMP: 'khaosat_timestamp'
+    KHAOSAT_TIMESTAMP: 'khaosat_timestamp',
+    ELEMENTS_ALL: 'elements_data_all',
+    ELEMENTS_TIMESTAMP: 'elements_timestamp',
+    HYDRO_ALL: 'hydro_data_all',
+    HYDRO_TIMESTAMP: 'hydro_timestamp'
 };
 
 // Hàm tạo TTL ngẫu nhiên để tránh cache stampede
@@ -40,31 +66,51 @@ const generateRandomTTL = (baseTTL, jitterPercent = 10) => {
 const cacheService = {
     // Lấy data từ cache
     get: async (key) => {
-        const data = await redis.get(key);
         try {
-            return JSON.parse(data);
-        } catch {
-            return data;
+            const data = await redis.get(key);
+            if (!data) return null;
+            try {
+                return JSON.parse(data);
+            } catch {
+                return data;
+            }
+        } catch (error) {
+            console.error('❌ Redis get error:', error.message);
+            return null; // Trả về null nếu Redis lỗi, không throw
         }
     },
 
     // Lưu data vào cache với TTL ngẫu nhiên
     set: async (key, data, baseTTL = 1800, jitterPercent = 10) => {
-        const ttl = generateRandomTTL(baseTTL, jitterPercent);
-        const value = typeof data === 'string' ? data : JSON.stringify(data);
-        await redis.set(key, value, 'EX', ttl);
-        console.log(`Cache set for key: ${key} with TTL: ${ttl}s (base: ${baseTTL}s + jitter: ${ttl - baseTTL}s)`);
+        try {
+            const ttl = generateRandomTTL(baseTTL, jitterPercent);
+            const value = typeof data === 'string' ? data : JSON.stringify(data);
+            await redis.set(key, value, 'EX', ttl);
+            console.log(`Cache set for key: ${key} with TTL: ${ttl}s (base: ${baseTTL}s + jitter: ${ttl - baseTTL}s)`);
+        } catch (error) {
+            console.error('❌ Redis set error:', error.message);
+            // Không throw, chỉ log lỗi
+        }
     },
 
     // Xóa cache
     del: async (key) => {
-        await redis.del(key);
+        try {
+            await redis.del(key);
+        } catch (error) {
+            console.error('❌ Redis del error:', error.message);
+        }
     },
 
     // Kiểm tra cache có tồn tại không
     has: async (key) => {
-        const exists = await redis.exists(key);
-        return !!exists;
+        try {
+            const exists = await redis.exists(key);
+            return !!exists;
+        } catch (error) {
+            console.error('❌ Redis has error:', error.message);
+            return false; // Trả về false nếu Redis lỗi
+        }
     },
 
     // Lấy thông tin cache stats

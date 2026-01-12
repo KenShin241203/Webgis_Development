@@ -26,6 +26,8 @@ const khaosat = require('./src/routes/khaosat/khaosat.api');
 const upload = require('./src/routes/upload/upload.api');
 const roles = require('./src/routes/auth/roles.api');
 const permissions = require('./src/routes/auth/permissions.api');
+const elements = require('./src/routes/elements/elements.api');
+const hydro = require('./src/routes/hydro/hydro.api');
 
 app.use('/api', login)
 app.use('/api', user)
@@ -40,6 +42,8 @@ app.use('/api', khaosat);
 app.use('/api', upload);
 app.use('/api', roles);
 app.use('/api', permissions);
+app.use('/api', elements);
+app.use('/api', hydro);
 
 app.listen(process.env.PORT_SERVER, () => console.log(`Server started on port ${process.env.PORT_SERVER}`));
 

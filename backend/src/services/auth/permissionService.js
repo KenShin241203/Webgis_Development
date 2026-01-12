@@ -63,6 +63,18 @@ const DEFAULT_PERMISSIONS = [
     { name: 'ROLE_UPDATE', description: 'Sửa role' },
     { name: 'ROLE_DELETE', description: 'Xóa role' },
 
+    // Role elements permissions
+    { name: 'ELEMENTS_VIEW', description: 'Xem danh sách elements' },
+    { name: 'ELEMENTS_CREATE', description: 'Tạo elements mới' },
+    { name: 'ELEMENTS_UPDATE', description: 'Sửa elements' },
+    { name: 'ELEMENTS_DELETE', description: 'Xóa elements' },
+
+    // Hydro data permissions
+    { name: 'HYDRO_VIEW', description: 'Xem dữ liệu hydro' },
+    { name: 'HYDRO_CREATE', description: 'Thêm dữ liệu hydro' },
+    { name: 'HYDRO_UPDATE', description: 'Sửa dữ liệu hydro' },
+    { name: 'HYDRO_DELETE', description: 'Xóa dữ liệu hydro' },
+
     // System permissions
     { name: 'SYSTEM_ADMIN', description: 'Quản trị hệ thống' },
     { name: 'WEATHER_VIEW', description: 'Xem thông tin thời tiết' }
