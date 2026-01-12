@@ -1,6 +1,6 @@
 (function () {
     const API_ENDPOINT = '/api/roles';
-    const MODULES = ['CONG', 'SUTLUN', 'CHATLUONG', 'DEBAO', 'DOLUN', 'HIENTRANG', 'NGAPLUT', 'KHAOSAT', 'USER', 'ROLE', 'SYSTEM'];
+    const MODULES = ['CONG', 'SUTLUN', 'CHATLUONG', 'DEBAO', 'DOLUN', 'HIENTRANG', 'NGAPLUT', 'KHAOSAT', 'ELEMENTS', 'HYDRO', 'USER', 'ROLE', 'SYSTEM'];
     const ACTIONS = ['VIEW', 'CREATE', 'UPDATE', 'DELETE'];
     const SPECIAL_PERMISSIONS = ['CONG_BACKUP', 'WEATHER_VIEW'];
 
@@ -88,6 +88,8 @@
             'HIENTRANG': 'Hiện trạng',
             'NGAPLUT': 'Ngập lụt',
             'KHAOSAT': 'Khảo sát',
+            'ELEMENTS': 'Lưới elements',
+            'HYDRO': 'Dữ liệu thủy động lực',
             'USER': 'Quản lý User',
             'ROLE': 'Quản lý Role',
             'SYSTEM': 'Hệ thống'

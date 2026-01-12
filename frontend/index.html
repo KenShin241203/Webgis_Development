@@ -28,6 +28,18 @@
                     Thêm lớp <span class="dropdown-arrow">▼</span>
                 </button>
                 <div class="dropdown-menu" id="layerDropdownMenu">
+                    <div class="dropdown-item" data-layer="elements-hydro">
+                        <span class="layer-name">Lưới thủy lực + Dữ liệu thủy động lực</span>
+                        <button class="table-toggle-btn" data-layer="elements-hydro" disabled>📊</button>
+                    </div>
+                    <div class="dropdown-item" data-layer="mo-hinh-thuy-luc-2d">
+                        <span class="layer-name">Mô hình thủy lực 2D</span>
+                        <button class="table-toggle-btn" data-layer="mo-hinh-thuy-luc-2d" disabled>📊</button>
+                    </div>
+                    <div class="dropdown-item" data-layer="mo-hinh-thuy-luc-2d-canvas">
+                        <span class="layer-name">Mô hình thủy lực 2D (Canvas)</span>
+                        <button class="table-toggle-btn" data-layer="mo-hinh-thuy-luc-2d-canvas" disabled>📊</button>
+                    </div>
                     <div class="dropdown-item" data-layer="cong">
                         <span class="layer-name">Cống</span>
                         <button class="table-toggle-btn" data-layer="cong" disabled>📊</button>
@@ -84,7 +96,43 @@
     </header>
     <div id="map"></div>
 
+    <!-- Loading Spinner cho Layer -->
+    <div id="layerLoadingSpinner" class="layer-loading-spinner" style="display: none;">
+        <div class="spinner-container">
+            <div class="spinner"></div>
+            <div class="spinner-text" id="loadingSpinnerText">Đang tải dữ liệu...</div>
+        </div>
+    </div>
+
     <div id="miniMap" class="mini-map-container"></div>
+
+    <!-- Time Slider cho Mô hình thủy lực 2D - Canvas Version -->
+    <div id="thuyLuc2DTimeSliderContainerCanvas" class="time-slider-container date-picker-container"
+        style="display: none;">
+        <div class="time-slider-header">
+            <h4>📅 Chọn khoảng ngày - Mô hình thủy lực 2D (Canvas)</h4>
+            <button onclick="closeTimeSlider2DCanvas()" class="time-slider-close-btn">✕</button>
+        </div>
+        <div class="time-slider-content date-picker-card">
+            <div class="date-range-picker">
+                <div class="date-input-group">
+                    <label for="thuyLuc2DStartDatePickerCanvas" class="date-picker-label">Từ ngày</label>
+                    <input type="date" id="thuyLuc2DStartDatePickerCanvas" class="date-picker-input"
+                        onchange="onDateChangeCanvas()" />
+                </div>
+                <div class="date-separator">→</div>
+                <div class="date-input-group">
+                    <label for="thuyLuc2DEndDatePickerCanvas" class="date-picker-label">Đến ngày</label>
+                    <input type="date" id="thuyLuc2DEndDatePickerCanvas" class="date-picker-input"
+                        onchange="onDateChangeCanvas()" />
+                </div>
+            </div>
+            <div class="date-picker-display">
+                <span id="thuyLuc2DTimeDisplayCanvas">--</span>
+            </div>
+            <button onclick="onSearchHydroDataCanvas()" class="date-picker-btn">🔍 Tìm kiếm</button>
+        </div>
+    </div>
 
     <div class="footer" id="coord">Vĩ độ: 0 | Kinh độ: 0 | Tỉ lệ phóng: 0</div>
     <div id="controlPopup" class="popup">
@@ -111,6 +159,121 @@
                 </select>
                 <button onclick="queryData()" class="query-btn">🔍 Truy vấn</button>
             </div>
+        </div>
+    </div>
+
+    <div id="elements-table-container" class="data-table-container" style="display: none;">
+        <!-- Resize handles -->
+        <div class="resize-handle n"></div>
+        <div class="resize-handle s"></div>
+        <div class="resize-handle e"></div>
+        <div class="resize-handle w"></div>
+        <div class="resize-handle ne"></div>
+        <div class="resize-handle nw"></div>
+        <div class="resize-handle se"></div>
+        <div class="resize-handle sw"></div>
+
+        <div id="elements-table-header" class="data-table-header">
+            <div class="data-table-title-container">
+                <h4 class="data-table-title">📊 Bảng Elements (lưới thủy lực)</h4>
+                <button onclick="closeElementsTable()" class="data-table-close-btn">✕</button>
+            </div>
+            <div class="data-table-controls">
+                <div class="data-table-actions">
+                    <div class="data-table-search-section">
+                        <input type="text" id="elements-search-input" placeholder="Tìm theo ID hoặc tọa độ..."
+                            class="data-table-search-input">
+                        <button onclick="searchElementsData()" class="data-table-search-btn">🔍</button>
+                    </div>
+                    <button onclick="addElementRecord()" class="data-table-action-btn add-btn">➕ Thêm</button>
+                    <button onclick="editElementRecord()" class="data-table-action-btn edit-btn" disabled>✏️
+                        Sửa</button>
+                    <button onclick="deleteElementRecord()" class="data-table-action-btn delete-btn" disabled>🗑️
+                        Xóa</button>
+                </div>
+                <div class="data-table-pagination-controls">
+                    <label for="elements-pageSize" class="data-table-label">Số dòng hiển thị:</label>
+                    <input type="number" id="elements-pageSize" value="500" min="1" max="100000"
+                        class="data-table-page-size">
+                    <button onclick="updateElementsData()" class="data-table-update-btn">Cập nhật</button>
+                </div>
+            </div>
+        </div>
+        <div class="data-table-content">
+            <table id="elements-table" class="data-table">
+                <thead>
+                    <tr>
+                        <th>Element ID</th>
+                        <th>X</th>
+                        <th>Y</th>
+                        <th>Area</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dữ liệu sẽ được thêm ở đây -->
+                </tbody>
+            </table>
+            <div id="elements-pagination" class="data-table-pagination"></div>
+        </div>
+    </div>
+
+    <!-- Bảng dữ liệu Hydro -->
+    <div id="hydro-table-container" class="data-table-container" style="display: none;">
+        <!-- Resize handles -->
+        <div class="resize-handle n"></div>
+        <div class="resize-handle s"></div>
+        <div class="resize-handle e"></div>
+        <div class="resize-handle w"></div>
+        <div class="resize-handle ne"></div>
+        <div class="resize-handle nw"></div>
+        <div class="resize-handle se"></div>
+        <div class="resize-handle sw"></div>
+
+        <div id="hydro-table-header" class="data-table-header">
+            <div class="data-table-title-container">
+                <h4 class="data-table-title">📊 Bảng dữ liệu Hydro (thủy động lực)</h4>
+                <button onclick="closeHydroTable()" class="data-table-close-btn">✕</button>
+            </div>
+            <div class="data-table-controls">
+                <div class="data-table-actions">
+                    <div class="data-table-search-section">
+                        <input type="text" id="hydro-search-input" placeholder="Tìm kiếm..."
+                            class="data-table-search-input">
+                        <button onclick="searchHydroData()" class="data-table-search-btn">🔍</button>
+                    </div>
+                    <button onclick="addHydroRecord()" class="data-table-action-btn add-btn">➕ Thêm</button>
+                    <button onclick="editHydroRecord()" class="data-table-action-btn edit-btn" disabled>✏️ Sửa</button>
+                    <button onclick="deleteHydroRecord()" class="data-table-action-btn delete-btn" disabled>🗑️
+                        Xóa</button>
+                </div>
+                <div class="data-table-pagination-controls">
+                    <label for="hydro-pageSize" class="data-table-label">Số dòng hiển thị:</label>
+                    <input type="number" id="hydro-pageSize" value="50" min="1" max="10000"
+                        class="data-table-page-size">
+                    <button onclick="updateHydroData()" class="data-table-update-btn">Cập nhật</button>
+                </div>
+            </div>
+        </div>
+        <div class="data-table-content">
+            <table id="hydro-table" class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Element ID</th>
+                        <th>Thời gian</th>
+                        <th>Độ cao mặt nước (m)</th>
+                        <th>Độ sâu tổng (m)</th>
+                        <th>Vận tốc U (m/s)</th>
+                        <th>Vận tốc V (m/s)</th>
+                        <th>Tốc độ (m/s)</th>
+                        <th>Hướng (°)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dữ liệu sẽ được thêm ở đây -->
+                </tbody>
+            </table>
+            <div id="hydro-pagination" class="data-table-pagination"></div>
         </div>
     </div>
 
@@ -669,6 +832,9 @@
     <script src="weather-drag.js"></script>
     <script src="main.js"></script>
     <script src="login/login.js"></script>
+    <script src="layers/layer_elements_hydro.js"></script>
+    <script src="layers/layer_mo_hinh_thuy_luc_2d.js"></script>
+    <script src="layers/layer_mo_hinh_thuy_luc_2d_canvas.js"></script>
     <script src="layers/layer_cong.js"></script>
     <script src="layers/layer_chatluong.js"></script>
     <script src="layers/layer_debao.js"></script>
@@ -678,6 +844,8 @@
     <script src="layers/layer_ngaplut.js"></script>
     <script src="layers/layer_khaosat.js"></script>
     <script src="tables/table_sutlun.js"></script>
+    <script src="tables/table_elements.js"></script>
+    <script src="tables/table_hydro.js"></script>
     <script src="tables/table_cong.js"></script>
     <script src="tables/table_chatluong.js"></script>
     <script src="tables/table_debao.js"></script>
@@ -692,6 +860,12 @@
         document.addEventListener('DOMContentLoaded', function () {
             if (typeof window.initSutLunTable === 'function') {
                 window.initSutLunTable();
+            }
+            if (typeof window.initElementsTable === 'function') {
+                window.initElementsTable();
+            }
+            if (typeof window.initHydroTable === 'function') {
+                window.initHydroTable();
             }
             if (typeof window.initCongTable === 'function') {
                 window.initCongTable();

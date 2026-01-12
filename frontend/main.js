@@ -227,6 +227,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Mapping từ data-layer attribute đến layer group và function
     const layerConfig = {
+        'elements-hydro': {
+            layerGroup: window.elementsHydroLayerGroup,
+            fetchFunction: 'fetchAndShowElementsAndHydro',
+            tableToggleId: 'toggleElementsHydroTable'
+        },
+        'mo-hinh-thuy-luc-2d': {
+            layerGroup: window.moHinhThuyLuc2DLayerGroup,
+            fetchFunction: 'fetchAndShowMoHinhThuyLuc2D',
+            tableToggleId: null
+        },
+        'mo-hinh-thuy-luc-2d-canvas': {
+            layerGroup: window.moHinhThuyLuc2DCanvasLayer,  // Lưu ý: không phải LayerGroup
+            fetchFunction: 'fetchAndShowMoHinhThuyLuc2DCanvas',
+            tableToggleId: null
+        },
         'cong': {
             layerGroup: window.congLayerGroup,
             fetchFunction: 'fetchAndShowCong',
@@ -367,6 +382,26 @@ document.addEventListener('DOMContentLoaded', function () {
                 alert('Vui lòng đóng bảng dữ liệu điểm khảo sát trước khi tắt layer!');
                 return;
             }
+            if (layerKey === 'elements' && typeof window.canElementsToggleOff === 'function' && !window.canElementsToggleOff()) {
+                alert('Vui lòng đóng bảng dữ liệu elements trước khi tắt layer!');
+                return;
+            }
+            if (layerKey === 'mo-hinh-thuy-luc-2d') {
+                // Ẩn time slider khi tắt layer
+                if (typeof window.closeTimeSlider2D === 'function') {
+                    window.closeTimeSlider2D();
+                }
+            }
+            if (layerKey === 'mo-hinh-thuy-luc-2d-canvas') {
+                // Ẩn time slider khi tắt layer
+                if (typeof window.closeTimeSlider2DCanvas === 'function') {
+                    window.closeTimeSlider2DCanvas();
+                }
+                // Xóa Canvas layer
+                if (typeof window.removeMoHinhThuyLuc2DCanvasLayer === 'function') {
+                    window.removeMoHinhThuyLuc2DCanvasLayer();
+                }
+            }
 
             // Tắt layer hiện tại
             const config = layerConfig[layerKey];
@@ -406,6 +441,9 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             if (layerKey === 'khaosat' && typeof window.closeKhaoSatTable === 'function') {
                 window.closeKhaoSatTable();
+            }
+            if (layerKey === 'elements' && typeof window.closeElementsTable === 'function') {
+                window.closeElementsTable();
             }
 
             currentActiveLayer = null;
@@ -458,6 +496,26 @@ document.addEventListener('DOMContentLoaded', function () {
                 needToCloseTable = true;
                 currentOpenTable = 'điểm khảo sát';
             }
+            if (currentActiveLayer === 'elements' && typeof window.canElementsToggleOff === 'function' && !window.canElementsToggleOff()) {
+                needToCloseTable = true;
+                currentOpenTable = 'elements';
+            }
+            if (currentActiveLayer === 'mo-hinh-thuy-luc-2d') {
+                // Đóng time slider khi chuyển layer
+                if (typeof window.closeTimeSlider2D === 'function') {
+                    window.closeTimeSlider2D();
+                }
+            }
+            if (currentActiveLayer === 'mo-hinh-thuy-luc-2d-canvas') {
+                // Đóng time slider khi chuyển layer
+                if (typeof window.closeTimeSlider2DCanvas === 'function') {
+                    window.closeTimeSlider2DCanvas();
+                }
+                // Xóa Canvas layer
+                if (typeof window.removeMoHinhThuyLuc2DCanvasLayer === 'function') {
+                    window.removeMoHinhThuyLuc2DCanvasLayer();
+                }
+            }
 
             if (needToCloseTable) {
                 alert(`Vui lòng đóng bảng dữ liệu ${currentOpenTable} trước khi chuyển layer!`);
@@ -484,17 +542,22 @@ document.addEventListener('DOMContentLoaded', function () {
             tableToggleBtn.style.opacity = '1';
         }
 
+        // Hiển thị loading spinner khi bắt đầu load layer
+        showLoadingIndicator(`Đang tải layer: ${layerKey}...`);
+
         // Gọi hàm fetch tương ứng với callback hoàn thành
         const onLayerLoaded = () => {
             isLoadingLayer = false;
             enableAllDropdownItems();
             currentActiveLayer = layerKey;
+            hideLoadingIndicator();
             console.log('Layer đã load xong:', layerKey);
         };
 
         const onLayerError = (error) => {
             isLoadingLayer = false;
             enableAllDropdownItems();
+            hideLoadingIndicator();
             console.error('Lỗi load layer:', error);
             alert('Lỗi khi tải layer: ' + error.message);
         };
@@ -509,6 +572,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 const pageSizeInput = document.getElementById('cong-pageSize');
                 const pageSize = parseInt(pageSizeInput?.value) || 100;
                 window[config.fetchFunction](pageSize).then(onLayerLoaded).catch(onLayerError);
+            } else if (layerKey === 'elements-hydro') {
+                const elementsPageSizeInput = document.getElementById('elements-pageSize');
+                const hydroPageSizeInput = document.getElementById('hydro-pageSize');
+                const elementsPageSize = parseInt(elementsPageSizeInput?.value) || 500;
+                const hydroPageSize = parseInt(hydroPageSizeInput?.value) || 50;
+                window[config.fetchFunction](elementsPageSize, hydroPageSize).then(onLayerLoaded).catch(onLayerError);
             } else if (layerKey === 'chatluong') {
                 const pageSizeInput = document.getElementById('chatluong-pageSize');
                 const pageSize = parseInt(pageSizeInput?.value) || 100;
@@ -531,7 +600,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 window[config.fetchFunction](pageSize).then(onLayerLoaded).catch(onLayerError);
             } else if (layerKey === 'khaosat') {
                 window[config.fetchFunction]().then(onLayerLoaded).catch(onLayerError);
-            } else {
+            } else if (layerKey === 'mo-hinh-thuy-luc-2d') {
+                // Hiển thị time slider khi bật layer
+                if (typeof window.showTimeSlider2D === 'function') {
+                    window.showTimeSlider2D();
+                }
+                // Fetch dữ liệu (không có timestamp mặc định, sẽ lấy tất cả)
+                window[config.fetchFunction](null, 10000).then(() => {
+                    onLayerLoaded();
+                }).catch(onLayerError);
+            } else if (layerKey === 'mo-hinh-thuy-luc-2d-canvas') {
+                // Chỉ hiển thị date picker, không fetch data ngay
+                if (typeof window.showTimeSlider2DCanvas === 'function') {
+                    window.showTimeSlider2DCanvas();
+                }
+                // Không fetch data, chỉ hiển thị UI để user chọn khoảng thời gian
+                onLayerLoaded();
+            }
+            else {
                 window[config.fetchFunction]().then(onLayerLoaded).catch(onLayerError);
             }
         } else {
@@ -600,6 +686,45 @@ document.addEventListener('DOMContentLoaded', function () {
                         window.toggleKhaoSatTable();
                     }
                     break;
+                case 'elements-hydro':
+                    // Toggle cả 2 table cùng lúc
+                    if (typeof window.toggleElementsTable === 'function') {
+                        window.toggleElementsTable();
+                    }
+                    if (typeof window.toggleHydroTable === 'function') {
+                        window.toggleHydroTable();
+                    }
+                    break;
+                case 'mo-hinh-thuy-luc-2d':
+                    // Hiển thị/ẩn time slider
+                    const sliderContainer = document.getElementById('thuyLuc2DTimeSliderContainer');
+                    if (sliderContainer) {
+                        if (sliderContainer.style.display === 'none') {
+                            if (typeof window.showTimeSlider2D === 'function') {
+                                window.showTimeSlider2D();
+                            }
+                        } else {
+                            if (typeof window.closeTimeSlider2D === 'function') {
+                                window.closeTimeSlider2D();
+                            }
+                        }
+                    }
+                    break;
+                case 'mo-hinh-thuy-luc-2d-canvas':
+                    // Hiển thị/ẩn time slider canvas
+                    const sliderContainerCanvas = document.getElementById('thuyLuc2DTimeSliderContainerCanvas');
+                    if (sliderContainerCanvas) {
+                        if (sliderContainerCanvas.style.display === 'none' || sliderContainerCanvas.style.display === '') {
+                            if (typeof window.showTimeSlider2DCanvas === 'function') {
+                                window.showTimeSlider2DCanvas();
+                            }
+                        } else {
+                            if (typeof window.closeTimeSlider2DCanvas === 'function') {
+                                window.closeTimeSlider2DCanvas();
+                            }
+                        }
+                    }
+                    break;
                 // Thêm các case khác cho các bảng khác
                 default:
                     alert('Chức năng bảng dữ liệu cho layer này đang được phát triển.');
@@ -619,9 +744,39 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
+// ===== LOADING INDICATOR FUNCTIONS ===== //
+/**
+ * Hiển thị loading spinner
+ * @param {string} message - Thông báo hiển thị (mặc định: "Đang tải dữ liệu...")
+ */
+function showLoadingIndicator(message = 'Đang tải dữ liệu...') {
+    const spinner = document.getElementById('layerLoadingSpinner');
+    const spinnerText = document.getElementById('loadingSpinnerText');
+
+    if (spinner) {
+        if (spinnerText) {
+            spinnerText.textContent = message;
+        }
+        spinner.style.display = 'flex';
+    }
+}
+
+/**
+ * Ẩn loading spinner
+ */
+function hideLoadingIndicator() {
+    const spinner = document.getElementById('layerLoadingSpinner');
+
+    if (spinner) {
+        spinner.style.display = 'none';
+    }
+}
+
 // Export các function ra window object
 window.toggleWeather = toggleWeather;
 window.queryData = queryData;
+window.showLoadingIndicator = showLoadingIndicator;
+window.hideLoadingIndicator = hideLoadingIndicator;
 
 // ========== API REQUESTS ==========
 var request = new XMLHttpRequest();
