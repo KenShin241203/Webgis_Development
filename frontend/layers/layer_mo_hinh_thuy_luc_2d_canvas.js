@@ -1,5 +1,691 @@
 // ===== LAYER: MÔ HÌNH THỦY LỰC 2D - CANVAS VERSION ===== //
 // Layer hiển thị mô hình thủy lực 2D bằng Canvas với IDW interpolation và vector arrows
+// HOẶC Leaflet.heat (nhanh hơn) + Canvas arrows
+
+// ===== HEATMAP LAYER CLASS (SỬ DỤNG LEAFLET.HEAT) ===== //
+/**
+ * Layer sử dụng Leaflet.heat cho heatmap (nhanh hơn Canvas 10-50x)
+ * Kết hợp với Canvas layer riêng cho vector arrows
+ */
+L.HeatHydroLayer = L.LayerGroup.extend({
+    /**
+     * Khởi tạo layer
+     * @param {Object} options - Các tùy chọn
+     * @param {string} options.colorField - 'surface_elev' hoặc 'total_depth'
+     * @param {string} options.arrowColor - 'black', 'speed', hoặc màu hex
+     * @param {number} options.arrowScale - Tỷ lệ độ dài mũi tên
+     * @param {number} options.arrowSpacing - Khoảng cách giữa các mũi tên (pixels)
+     * @param {number} options.heatRadius - Bán kính heatmap (pixels, mặc định 25)
+     * @param {number} options.heatBlur - Độ mờ heatmap (mặc định 15)
+     * @param {number} options.heatMaxZoom - Zoom tối đa để hiển thị heatmap (mặc định 18)
+     * @param {number} options.heatMax - Giá trị tối đa để normalize (null = auto)
+     * @param {number} options.heatMinOpacity - Độ trong suốt tối thiểu (0-1)
+     * @param {Object} options.heatGradient - Gradient màu cho heatmap
+     */
+    initialize: function (options) {
+        L.LayerGroup.prototype.initialize.call(this);
+        L.setOptions(this, options);
+
+        this._heatLayer = null; // Leaflet.heat layer
+        this._arrowCanvasLayer = null; // Canvas layer cho arrows
+        this._data = []; // Dữ liệu hiện tại
+        this._dataByTime = {}; // Dữ liệu theo thời gian
+        this._timeKeys = [];
+        this._currentTimeIndex = 0;
+        this._isAnimating = false;
+        this._animationInterval = null;
+        this._animationSpeed = options.animationSpeed || 500;
+        this._colorField = options.colorField || 'total_depth';
+        this._arrowColor = options.arrowColor || 'speed';
+        this._legendContainer = null;
+        this._showLegend = options.showLegend !== false;
+    },
+
+    /**
+     * Được gọi khi layer được thêm vào map
+     */
+    onAdd: function (map) {
+        this._map = map;
+
+        // Tạo heat layer
+        this._heatLayer = L.heatLayer([], this._getHeatOptions());
+        this.addLayer(this._heatLayer);
+
+        // Tạo canvas layer cho arrows (custom canvas)
+        this._arrowCanvasLayer = L.layerGroup();
+        this._arrowCanvas = null;
+        this._arrowCanvasCtx = null;
+        this.addLayer(this._arrowCanvasLayer);
+
+        // Tạo legend
+        if (this._showLegend) {
+            this._createLegend();
+        }
+
+        // Vẽ lại khi map thay đổi
+        map.on('moveend', this._redrawArrows, this);
+        map.on('zoomend', this._redrawArrows, this);
+    },
+
+    /**
+     * Được gọi khi layer được xóa khỏi map
+     */
+    onRemove: function (map) {
+        this.stopAnimation();
+        this._removeLegend();
+
+        // Xóa canvas
+        if (this._arrowCanvas && this._arrowCanvas.parentNode) {
+            this._arrowCanvas.parentNode.removeChild(this._arrowCanvas);
+        }
+        this._arrowCanvas = null;
+        this._arrowCanvasCtx = null;
+
+        map.off('moveend', this._redrawArrows, this);
+        map.off('zoomend', this._redrawArrows, this);
+        L.LayerGroup.prototype.onRemove.call(this, map);
+    },
+
+    /**
+     * Lấy options cho Leaflet.heat
+     */
+    _getHeatOptions: function () {
+        const baseOptions = {
+            radius: this.options.heatRadius || 25,
+            blur: this.options.heatBlur || 15,
+            maxZoom: this.options.heatMaxZoom || 18,
+            minOpacity: this.options.heatMinOpacity || 0.3,
+            max: this.options.heatMax || null
+        };
+
+        // Gradient màu dựa trên colorField
+        if (this.options.heatGradient) {
+            baseOptions.gradient = this.options.heatGradient;
+        } else if (this._colorField === 'surface_elev') {
+            // Gradient cho surface elevation: Red -> Orange -> Yellow -> Green -> Blue -> Purple
+            baseOptions.gradient = {
+                0.0: 'blue',      // Purple (thấp nhất)
+                0.2: 'cyan',     // Blue
+                0.4: 'lime',     // Green
+                0.6: 'yellow',   // Yellow
+                0.8: 'orange',   // Orange
+                1.0: 'red'       // Red (cao nhất)
+            };
+        } else {
+            // Gradient cho total depth: Light blue -> Blue -> Dark blue
+            baseOptions.gradient = {
+                0.0: 'rgba(204, 255, 255, 0.3)',  // Very light blue
+                0.3: 'rgba(102, 255, 255, 0.5)',  // Light blue
+                0.6: 'rgba(0, 204, 255, 0.7)',    // Cyan
+                0.8: 'rgba(0, 102, 255, 0.8)',    // Blue
+                1.0: 'rgba(0, 0, 128, 0.9)'       // Dark blue
+            };
+        }
+
+        return baseOptions;
+    },
+
+    /**
+     * Set dữ liệu và vẽ
+     */
+    setData: function (data, autoAnimate = true) {
+        // Group data theo thời gian nếu có
+        if (data && data.length > 0 && data[0].time) {
+            this._dataByTime = {};
+            this._timeKeys = [];
+
+            data.forEach(item => {
+                if (item.time) {
+                    const timeKey = new Date(item.time).toISOString();
+                    if (!this._dataByTime[timeKey]) {
+                        this._dataByTime[timeKey] = [];
+                        this._timeKeys.push(timeKey);
+                    }
+                    this._dataByTime[timeKey].push(item);
+                }
+            });
+
+            this._timeKeys.sort();
+            this._currentTimeIndex = 0;
+
+            if (this._timeKeys.length > 0) {
+                this._data = this._dataByTime[this._timeKeys[0]] || [];
+            } else {
+                this._data = data || [];
+            }
+
+            if (autoAnimate && this._timeKeys.length > 1) {
+                this.startAnimation();
+            }
+        } else {
+            this._data = data || [];
+            this._dataByTime = {};
+            this._timeKeys = [];
+            this._currentTimeIndex = 0;
+            this.stopAnimation();
+        }
+
+        this._updateVisualization();
+    },
+
+    /**
+     * Cập nhật visualization (heatmap + arrows)
+     */
+    _updateVisualization: function () {
+        if (!this._map || this._data.length === 0) return;
+
+        // 1. Cập nhật heatmap
+        const heatData = this._data
+            .filter(point => {
+                const value = this._colorField === 'surface_elev'
+                    ? point.surface_elev
+                    : point.total_depth;
+                return value != null && value > 0;
+            })
+            .map(point => {
+                const value = this._colorField === 'surface_elev'
+                    ? point.surface_elev
+                    : point.total_depth;
+                // Normalize value: heatmap cần intensity (0-1)
+                // Tạm thời dùng giá trị trực tiếp, sẽ normalize sau
+                return [point.lat, point.lng, Math.max(0.1, value || 0)];
+            });
+
+        // Normalize values để heatmap hiển thị đẹp
+        if (heatData.length > 0) {
+            const values = heatData.map(d => d[2]);
+            const min = Math.min(...values);
+            const max = Math.max(...values);
+            const range = max - min;
+
+            // Normalize về 0-1
+            // Lưu ý: nếu range = 0 (tất cả giá trị bằng nhau) thì set intensity = 1 để không bị "mất" layer
+            heatData.forEach(d => {
+                if (!range) {
+                    d[2] = 1;
+                } else {
+                    d[2] = (d[2] - min) / range;
+                }
+                // Clamp intensity tối thiểu để vẫn nhìn thấy
+                d[2] = Math.max(0.1, Math.min(1, d[2]));
+            });
+
+            // Cập nhật heat layer
+            this._heatLayer.setLatLngs(heatData);
+        } else {
+            this._heatLayer.setLatLngs([]);
+        }
+
+        // 2. Vẽ arrows
+        this._redrawArrows();
+    },
+
+    /**
+     * Vẽ vector arrows trên canvas
+     */
+    _redrawArrows: function () {
+        if (!this._map || this._data.length === 0) return;
+
+        // Tạo canvas nếu chưa có
+        if (!this._arrowCanvas) {
+            this._arrowCanvas = L.DomUtil.create('canvas', 'leaflet-arrow-canvas');
+            this._arrowCanvas.style.position = 'absolute';
+            this._arrowCanvas.style.top = '0';
+            this._arrowCanvas.style.left = '0';
+            this._arrowCanvas.style.pointerEvents = 'none';
+            this._arrowCanvas.style.zIndex = '650';
+            const pane = this._map.getPane('overlayPane') || this._map.getPane();
+            pane.appendChild(this._arrowCanvas);
+            this._arrowCanvasCtx = this._arrowCanvas.getContext('2d');
+        }
+
+        const canvas = this._arrowCanvas;
+        const ctx = this._arrowCanvasCtx;
+
+        // Cập nhật kích thước và vị trí canvas
+        const mapSize = this._map.getSize();
+        const pixelRatio = window.devicePixelRatio || 1;
+        canvas.width = mapSize.x * pixelRatio;
+        canvas.height = mapSize.y * pixelRatio;
+        canvas.style.width = mapSize.x + 'px';
+        canvas.style.height = mapSize.y + 'px';
+
+        // Reset transform trước khi scale
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.scale(pixelRatio, pixelRatio);
+
+        // Clear canvas
+        ctx.clearRect(0, 0, mapSize.x, mapSize.y);
+
+        // Arrow spacing động theo zoom
+        const zoom = this._map.getZoom();
+        let arrowSpacing = this.options.arrowSpacing || 30;
+        if (zoom < 10) {
+            arrowSpacing = 60;
+        } else if (zoom < 13) {
+            arrowSpacing = 40;
+        } else {
+            arrowSpacing = 30;
+        }
+
+        const arrowScale = this.options.arrowScale || 50;
+        const bounds = this._map.getBounds();
+
+        // Lọc dữ liệu trong viewport
+        const visibleData = this._data.filter(point => {
+            return point.lat >= bounds.getSouth() && point.lat <= bounds.getNorth() &&
+                point.lng >= bounds.getWest() && point.lng <= bounds.getEast() &&
+                point.direction != null && point.speed > 0;
+        });
+
+        if (visibleData.length === 0) return;
+
+        // Sampling nếu quá nhiều điểm
+        const maxArrows = 2000; // Giới hạn số arrows
+        let sampledData = visibleData;
+        if (visibleData.length > maxArrows) {
+            const step = Math.ceil(visibleData.length / maxArrows);
+            sampledData = visibleData.filter((_, i) => i % step === 0);
+        }
+
+        // Chuyển đổi sang pixel coordinates
+        const pixelData = sampledData.map(point => {
+            const pixel = this._map.latLngToContainerPoint([point.lat, point.lng]);
+            return {
+                ...point,
+                pixelX: pixel.x,
+                pixelY: pixel.y
+            };
+        });
+
+        // Tạo grid để vẽ arrows đều
+        const gridCols = Math.ceil(mapSize.x / arrowSpacing);
+        const gridRows = Math.ceil(mapSize.y / arrowSpacing);
+
+        // Tạo spatial index
+        const cellSize = arrowSpacing * 1.5;
+        const spatialGrid = {};
+        pixelData.forEach(point => {
+            const cellX = Math.floor(point.pixelX / cellSize);
+            const cellY = Math.floor(point.pixelY / cellSize);
+            const key = `${cellX},${cellY}`;
+            if (!spatialGrid[key]) {
+                spatialGrid[key] = [];
+            }
+            spatialGrid[key].push(point);
+        });
+
+        // Vẽ arrows
+        ctx.save();
+        for (let row = 0; row < gridRows; row++) {
+            for (let col = 0; col < gridCols; col++) {
+                const gridX = col * arrowSpacing;
+                const gridY = row * arrowSpacing;
+
+                // Tìm điểm gần nhất
+                const cellX = Math.floor(gridX / cellSize);
+                const cellY = Math.floor(gridY / cellSize);
+                let nearestPoint = null;
+                let minDistance = Infinity;
+
+                for (let dx = -1; dx <= 1; dx++) {
+                    for (let dy = -1; dy <= 1; dy++) {
+                        const key = `${cellX + dx},${cellY + dy}`;
+                        if (spatialGrid[key]) {
+                            spatialGrid[key].forEach(point => {
+                                const distance = Math.sqrt(
+                                    Math.pow(gridX - point.pixelX, 2) + Math.pow(gridY - point.pixelY, 2)
+                                );
+                                if (distance < minDistance && distance < arrowSpacing * 1.5) {
+                                    minDistance = distance;
+                                    nearestPoint = point;
+                                }
+                            });
+                        }
+                    }
+                }
+
+                // Vẽ arrow tại vị trí thực tế của điểm (không phải grid position)
+                if (nearestPoint) {
+                    const arrowColor = this._arrowColor === 'speed'
+                        ? this._getColorBySpeed(nearestPoint.speed)
+                        : this._arrowColor === 'black'
+                            ? '#000000'
+                            : this._arrowColor;
+                    // Vẽ tại vị trí pixel thực tế của điểm
+                    this._drawArrow(ctx, nearestPoint.pixelX, nearestPoint.pixelY, nearestPoint.direction, nearestPoint.speed, arrowScale, arrowColor);
+                }
+            }
+        }
+        ctx.restore();
+    },
+
+    /**
+     * Vẽ một mũi tên
+     */
+    _drawArrow: function (ctx, x, y, direction, speed, scale, color) {
+        const angleRad = (direction - 90) * Math.PI / 180;
+        const arrowLength = Math.max(5, Math.min(50, speed * scale));
+        const endX = x + arrowLength * Math.cos(angleRad);
+        const endY = y + arrowLength * Math.sin(angleRad);
+
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(endX, endY);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        const arrowHeadLength = arrowLength * 0.2;
+        const arrowHeadAngle = Math.PI / 6;
+        const angle1 = angleRad + Math.PI - arrowHeadAngle;
+        const angle2 = angleRad + Math.PI + arrowHeadAngle;
+
+        ctx.beginPath();
+        ctx.moveTo(endX, endY);
+        ctx.lineTo(endX + arrowHeadLength * Math.cos(angle1), endY + arrowHeadLength * Math.sin(angle1));
+        ctx.lineTo(endX + arrowHeadLength * Math.cos(angle2), endY + arrowHeadLength * Math.sin(angle2));
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+    },
+
+    /**
+     * Lấy màu theo tốc độ
+     */
+    _getColorBySpeed: function (speed) {
+        if (speed >= 2.0) return '#ff0000';
+        if (speed >= 1.0) return '#ff6600';
+        if (speed >= 0.5) return '#ffaa00';
+        if (speed >= 0.2) return '#ffcc00';
+        return '#0066cc';
+    },
+
+    /**
+     * Animation methods (giống Canvas layer)
+     */
+    startAnimation: function () {
+        if (this._timeKeys.length <= 1 || this._isAnimating) return;
+
+        this._isAnimating = true;
+        const self = this;
+        this._animationInterval = setInterval(() => {
+            self._currentTimeIndex = (self._currentTimeIndex + 1) % self._timeKeys.length;
+            const currentTimeKey = self._timeKeys[self._currentTimeIndex];
+            self._data = self._dataByTime[currentTimeKey] || [];
+            self._updateVisualization();
+        }, this._animationSpeed);
+    },
+
+    stopAnimation: function () {
+        if (this._animationInterval) {
+            clearInterval(this._animationInterval);
+            this._animationInterval = null;
+        }
+        this._isAnimating = false;
+    },
+
+    toggleAnimation: function () {
+        if (this._isAnimating) {
+            this.stopAnimation();
+        } else {
+            this.startAnimation();
+        }
+    },
+
+    goToFrame: function (index) {
+        if (index < 0 || index >= this._timeKeys.length) return;
+        this._currentTimeIndex = index;
+        const currentTimeKey = this._timeKeys[this._currentTimeIndex];
+        this._data = this._dataByTime[currentTimeKey] || [];
+        this._updateVisualization();
+    },
+
+    getAnimationInfo: function () {
+        return {
+            isAnimating: this._isAnimating,
+            currentFrame: this._currentTimeIndex + 1,
+            totalFrames: this._timeKeys.length,
+            currentTime: this._timeKeys[this._currentTimeIndex] ? new Date(this._timeKeys[this._currentTimeIndex]) : null,
+            animationSpeed: this._animationSpeed
+        };
+    },
+
+    clearData: function () {
+        this._data = [];
+        this._dataByTime = {};
+        this._timeKeys = [];
+        this._currentTimeIndex = 0;
+        this.stopAnimation();
+        if (this._heatLayer) {
+            this._heatLayer.setLatLngs([]);
+        }
+        if (this._arrowCanvas && this._arrowCanvasCtx) {
+            this._arrowCanvasCtx.clearRect(0, 0, this._arrowCanvas.width, this._arrowCanvas.height);
+        }
+    },
+
+    /**
+     * Legend methods (tương tự Canvas layer)
+     */
+    _createLegend: function () {
+        this._removeLegend();
+        this._legendContainer = L.DomUtil.create('div', 'leaflet-legend-container');
+        this._legendContainer.style.cssText = `
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            min-width: 180px;
+            font-family: Arial, sans-serif;
+        `;
+        const mapContainer = this._map.getContainer();
+        mapContainer.appendChild(this._legendContainer);
+        this._updateLegend();
+    },
+
+    _updateLegend: function () {
+        if (!this._legendContainer) return;
+
+        // Clear nội dung cũ
+        this._legendContainer.innerHTML = '';
+
+        const fieldName = this._colorField === 'surface_elev' ? 'Surface elevation [m]' : 'Total depth [m]';
+
+        // Tạo title
+        const title = L.DomUtil.create('div', 'legend-title', this._legendContainer);
+        title.style.cssText = `
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+            border-bottom: 2px solid #0066cc;
+            padding-bottom: 5px;
+        `;
+        title.textContent = fieldName;
+
+        // Container cho gradient và labels (layout ngang)
+        const gradientWrapper = L.DomUtil.create('div', 'legend-gradient-wrapper', this._legendContainer);
+        gradientWrapper.style.cssText = `
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        `;
+
+        // Tạo gradient bar container
+        const gradientContainer = L.DomUtil.create('div', 'legend-gradient', gradientWrapper);
+        gradientContainer.style.cssText = `
+            width: 30px;
+            height: 200px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        `;
+
+        // Tạo gradient canvas
+        const gradientCanvas = L.DomUtil.create('canvas', '', gradientContainer);
+        gradientCanvas.width = 30;
+        gradientCanvas.height = 200;
+        gradientCanvas.style.cssText = `
+            width: 100%;
+            height: 100%;
+            display: block;
+        `;
+
+        const ctx = gradientCanvas.getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+
+        // Tạo gradient dựa trên colorField
+        if (this._colorField === 'surface_elev') {
+            // Gradient cho surface elevation: Red -> Orange -> Yellow -> Green -> Blue -> Purple
+            gradient.addColorStop(0, 'rgba(255, 0, 0, 0.7)');      // Red (1.5+)
+            gradient.addColorStop(0.1, 'rgba(255, 100, 0, 0.7)');  // Orange
+            gradient.addColorStop(0.2, 'rgba(255, 180, 0, 0.7)');  // Yellow-orange
+            gradient.addColorStop(0.3, 'rgba(255, 220, 0, 0.7)');  // Yellow
+            gradient.addColorStop(0.4, 'rgba(200, 255, 0, 0.7)');  // Yellow-green
+            gradient.addColorStop(0.5, 'rgba(100, 255, 0, 0.7)');  // Green
+            gradient.addColorStop(0.6, 'rgba(0, 255, 100, 0.7)'); // Green-blue
+            gradient.addColorStop(0.7, 'rgba(0, 200, 150, 0.7)'); // Cyan
+            gradient.addColorStop(0.8, 'rgba(0, 150, 200, 0.7)'); // Light blue
+            gradient.addColorStop(0.9, 'rgba(0, 100, 255, 0.7)'); // Blue
+            gradient.addColorStop(1, 'rgba(50, 0, 100, 0.7)');   // Purple
+        } else {
+            // Gradient cho total depth: Light blue -> Blue -> Dark blue
+            gradient.addColorStop(0, 'rgba(204, 255, 255, 0.5)');  // Very light blue
+            gradient.addColorStop(0.2, 'rgba(102, 255, 255, 0.6)'); // Light blue
+            gradient.addColorStop(0.4, 'rgba(0, 204, 255, 0.6)'); // Cyan
+            gradient.addColorStop(0.6, 'rgba(0, 102, 255, 0.6)'); // Light blue
+            gradient.addColorStop(0.8, 'rgba(0, 0, 255, 0.6)');   // Blue
+            gradient.addColorStop(1, 'rgba(0, 0, 128, 0.6)');     // Dark blue
+        }
+
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 30, 200);
+
+        // Tạo labels cho các mức giá trị (bên cạnh gradient)
+        const labelsContainer = L.DomUtil.create('div', 'legend-labels', gradientWrapper);
+        labelsContainer.style.cssText = `
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #333;
+            flex: 1;
+            padding: 2px 0;
+        `;
+
+        // Tạo labels dựa trên colorField
+        let labels = [];
+        if (this._colorField === 'surface_elev') {
+            labels = [
+                { value: '≥ 1.5', position: 0 },
+                { value: '1.4 - 1.5', position: 0.1 },
+                { value: '1.3 - 1.4', position: 0.2 },
+                { value: '1.2 - 1.3', position: 0.3 },
+                { value: '1.1 - 1.2', position: 0.4 },
+                { value: '1.0 - 1.1', position: 0.5 },
+                { value: '0.9 - 1.0', position: 0.6 },
+                { value: '0.8 - 0.9', position: 0.7 },
+                { value: '0.7 - 0.8', position: 0.8 },
+                { value: '0.6 - 0.7', position: 0.9 },
+                { value: '0.5 - 0.6', position: 0.95 },
+                { value: '0.4 - 0.5', position: 0.98 },
+                { value: '0.3 - 0.4', position: 0.99 },
+                { value: '0.2 - 0.3', position: 0.995 },
+                { value: '0.1 - 0.2', position: 0.998 },
+                { value: '< 0.1', position: 1 }
+            ];
+        } else {
+            labels = [
+                { value: '≥ 5.0', position: 0 },
+                { value: '3.0 - 5.0', position: 0.2 },
+                { value: '2.0 - 3.0', position: 0.4 },
+                { value: '1.0 - 2.0', position: 0.6 },
+                { value: '0.5 - 1.0', position: 0.8 },
+                { value: '< 0.5', position: 1 }
+            ];
+        }
+
+        // Hiển thị labels quan trọng (chọn một số để không quá dày)
+        let importantLabels = [];
+        if (this._colorField === 'surface_elev') {
+            // Chọn các labels quan trọng: đầu, giữa, cuối
+            importantLabels = [
+                labels[0],  // ≥ 1.5
+                labels[3],  // 1.2 - 1.3
+                labels[5],  // 1.0 - 1.1
+                labels[7],  // 0.8 - 0.9
+                labels[9],  // 0.6 - 0.7
+                labels[11], // 0.4 - 0.5
+                labels[13], // 0.2 - 0.3
+                labels[labels.length - 1] // < 0.1
+            ];
+        } else {
+            importantLabels = labels;
+        }
+
+        importantLabels.forEach((label, index) => {
+            const labelDiv = L.DomUtil.create('div', 'legend-label', labelsContainer);
+            labelDiv.style.cssText = `
+                padding: 1px 0;
+                line-height: 1.2;
+            `;
+            labelDiv.textContent = label.value;
+        });
+
+        // Thêm label "Undefined Value" nếu cần
+        const undefinedLabel = L.DomUtil.create('div', 'legend-undefined', this._legendContainer);
+        undefinedLabel.style.cssText = `
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            font-size: 11px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        `;
+        const undefinedColorBox = L.DomUtil.create('div', '', undefinedLabel);
+        undefinedColorBox.style.cssText = `
+            width: 14px;
+            height: 14px;
+            background: rgba(224, 224, 224, 0.3);
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            border-radius: 2px;
+        `;
+        const undefinedText = L.DomUtil.create('span', '', undefinedLabel);
+        undefinedText.textContent = 'Undefined Value';
+    },
+
+    _removeLegend: function () {
+        if (this._legendContainer && this._legendContainer.parentNode) {
+            this._legendContainer.parentNode.removeChild(this._legendContainer);
+        }
+        this._legendContainer = null;
+    },
+
+    toggleLegend: function () {
+        this._showLegend = !this._showLegend;
+        if (this._showLegend) {
+            this._createLegend();
+        } else {
+            this._removeLegend();
+        }
+    }
+});
+
+// Factory function
+L.heatHydroLayer = function (options) {
+    return new L.HeatHydroLayer(options);
+};
 
 // ===== CUSTOM CANVAS LAYER CLASS ===== //
 /**
@@ -17,11 +703,13 @@ L.CanvasHydroLayer = L.Layer.extend({
      * @param {number} options.arrowScale - Tỷ lệ độ dài mũi tên (mặc định 50)
      * @param {number} options.arrowSpacing - Khoảng cách giữa các mũi tên (pixels, mặc định 30)
      * @param {number} options.maxNearestPoints - Số lượng điểm tối đa sử dụng cho IDW (mặc định 20)
+     * @param {string} options.colorField - Trường dữ liệu để tô màu: 'surface_elev' hoặc 'total_depth' (mặc định 'total_depth')
+     * @param {string} options.arrowColor - Màu mũi tên: 'black', 'speed' (theo tốc độ), hoặc màu hex (mặc định 'speed')
      */
     initialize: function (options) {
         L.setOptions(this, options);
         this._canvas = null;
-        this._data = []; // Dữ liệu hydro hiện tại đang hiển thị {lat, lng, total_depth, u, v, direction, speed}
+        this._data = []; // Dữ liệu hydro hiện tại đang hiển thị {lat, lng, total_depth, surface_elev, u, v, direction, speed}
         this._dataByTime = {}; // Dữ liệu hydro được group theo thời gian {timeString: [data...]}
         this._timeKeys = []; // Danh sách các thời gian đã sắp xếp
         this._currentTimeIndex = 0; // Index thời gian hiện tại đang hiển thị
@@ -32,6 +720,10 @@ L.CanvasHydroLayer = L.Layer.extend({
         this._bounds = null; // Bounds của dữ liệu
         this._resetTimeout = null; // Timeout cho debounce
         this._drawFrame = null; // Animation frame cho drawing
+        this._colorField = options.colorField || 'total_depth'; // 'surface_elev' hoặc 'total_depth'
+        this._arrowColor = options.arrowColor || 'speed'; // 'black', 'speed', hoặc màu hex
+        this._legendContainer = null; // Container cho legend
+        this._showLegend = options.showLegend !== false; // Mặc định hiển thị legend
     },
 
     /**
@@ -57,6 +749,11 @@ L.CanvasHydroLayer = L.Layer.extend({
         map.on('move', this._reset, this);
         map.on('moveend', this._reset, this);
         map.on('zoomend', this._reset, this);
+
+        // Tạo legend nếu chưa có
+        if (this._showLegend) {
+            this._createLegend();
+        }
 
         // Vẽ lại khi map thay đổi
         map.whenReady(() => {
@@ -85,6 +782,9 @@ L.CanvasHydroLayer = L.Layer.extend({
         if (this._canvas && this._canvas.parentNode) {
             this._canvas.parentNode.removeChild(this._canvas);
         }
+
+        // Xóa legend
+        this._removeLegend();
 
         // Bỏ lắng nghe events
         map.off('viewreset', this._reset, this);
@@ -215,10 +915,17 @@ L.CanvasHydroLayer = L.Layer.extend({
         // Chuyển đổi dữ liệu sang pixel coordinates một lần
         const pixelData = data.map(point => {
             const pixel = this._map.latLngToContainerPoint([point.lat, point.lng]);
+            // Lấy giá trị theo colorField được chọn
+            let value = 0;
+            if (this._colorField === 'surface_elev') {
+                value = point.surface_elev != null ? point.surface_elev : 0;
+            } else {
+                value = point.total_depth || 0;
+            }
             return {
                 x: pixel.x,
                 y: pixel.y,
-                value: point.total_depth || 0
+                value: value
             };
         });
 
@@ -303,7 +1010,9 @@ L.CanvasHydroLayer = L.Layer.extend({
 
                     if (denominator > 0) {
                         const interpolatedValue = numerator / denominator;
-                        const color = this._getColorByDepth(interpolatedValue);
+                        const color = this._colorField === 'surface_elev'
+                            ? this._getColorBySurfaceElev(interpolatedValue)
+                            : this._getColorByDepth(interpolatedValue);
 
                         // Batch vẽ theo màu để tối ưu
                         batches.push({
@@ -439,7 +1148,16 @@ L.CanvasHydroLayer = L.Layer.extend({
 
                 // Vẽ arrow nếu có điểm gần nhất
                 if (nearestPoint && nearestPoint.direction != null && nearestPoint.speed > 0) {
-                    this._drawArrow(ctx, gridX, gridY, nearestPoint.direction, nearestPoint.speed, arrowScale);
+                    // Xác định màu arrow
+                    let arrowColor = '#000000'; // Mặc định đen
+                    if (this._arrowColor === 'speed') {
+                        arrowColor = this._getColorBySpeed(nearestPoint.speed);
+                    } else if (this._arrowColor === 'black') {
+                        arrowColor = '#000000';
+                    } else {
+                        arrowColor = this._arrowColor; // Màu hex tùy chỉnh
+                    }
+                    this._drawArrow(ctx, gridX, gridY, nearestPoint.direction, nearestPoint.speed, arrowScale, arrowColor);
                 }
             }
         }
@@ -455,8 +1173,9 @@ L.CanvasHydroLayer = L.Layer.extend({
      * @param {number} direction - Hướng (độ, 0-360)
      * @param {number} speed - Tốc độ (m/s)
      * @param {number} scale - Tỷ lệ độ dài
+     * @param {string} color - Màu mũi tên (hex)
      */
-    _drawArrow: function (ctx, x, y, direction, speed, scale) {
+    _drawArrow: function (ctx, x, y, direction, speed, scale, color = '#000000') {
         // Chuyển đổi hướng từ độ sang radian
         const angleRad = (direction - 90) * Math.PI / 180; // Trừ 90 vì 0 độ là hướng Bắc
 
@@ -471,7 +1190,7 @@ L.CanvasHydroLayer = L.Layer.extend({
         ctx.beginPath();
         ctx.moveTo(x, y);
         ctx.lineTo(endX, endY);
-        ctx.strokeStyle = this._getColorBySpeed(speed);
+        ctx.strokeStyle = color;
         ctx.lineWidth = 2;
         ctx.stroke();
 
@@ -492,7 +1211,7 @@ L.CanvasHydroLayer = L.Layer.extend({
         ctx.lineTo(head1X, head1Y);
         ctx.lineTo(head2X, head2Y);
         ctx.closePath();
-        ctx.fillStyle = this._getColorBySpeed(speed);
+        ctx.fillStyle = color;
         ctx.fill();
     },
 
@@ -519,6 +1238,52 @@ L.CanvasHydroLayer = L.Layer.extend({
             return 'rgba(102, 255, 255, 0.6)'; // Xanh nhạt - rất nông
         } else {
             return 'rgba(204, 255, 255, 0.5)'; // Xanh rất nhạt - cực nông
+        }
+    },
+
+    /**
+     * Lấy màu sắc dựa trên surface elevation (giống MIKE Zero)
+     * @param {number} surfaceElev - Surface elevation (m)
+     * @returns {string} Màu rgba
+     */
+    _getColorBySurfaceElev: function (surfaceElev) {
+        if (surfaceElev == null) {
+            return 'rgba(224, 224, 224, 0.3)'; // Màu xám trong suốt cho vùng undefined
+        }
+
+        // Color scheme giống MIKE Zero: Red -> Orange -> Yellow -> Green -> Blue -> Purple
+        if (surfaceElev >= 1.5) {
+            return 'rgba(255, 0, 0, 0.7)'; // Đỏ - cao
+        } else if (surfaceElev >= 1.4) {
+            return 'rgba(255, 100, 0, 0.7)'; // Cam đậm
+        } else if (surfaceElev >= 1.3) {
+            return 'rgba(255, 140, 0, 0.7)'; // Cam
+        } else if (surfaceElev >= 1.2) {
+            return 'rgba(255, 180, 0, 0.7)'; // Cam vàng
+        } else if (surfaceElev >= 1.1) {
+            return 'rgba(255, 200, 0, 0.7)'; // Vàng cam
+        } else if (surfaceElev >= 1.0) {
+            return 'rgba(255, 220, 0, 0.7)'; // Vàng
+        } else if (surfaceElev >= 0.9) {
+            return 'rgba(200, 255, 0, 0.7)'; // Vàng xanh
+        } else if (surfaceElev >= 0.8) {
+            return 'rgba(150, 255, 0, 0.7)'; // Xanh vàng
+        } else if (surfaceElev >= 0.7) {
+            return 'rgba(100, 255, 0, 0.7)'; // Xanh lá
+        } else if (surfaceElev >= 0.6) {
+            return 'rgba(0, 255, 100, 0.7)'; // Xanh lá đậm
+        } else if (surfaceElev >= 0.5) {
+            return 'rgba(0, 200, 150, 0.7)'; // Xanh lá xanh dương
+        } else if (surfaceElev >= 0.4) {
+            return 'rgba(0, 150, 200, 0.7)'; // Xanh dương nhạt
+        } else if (surfaceElev >= 0.3) {
+            return 'rgba(0, 100, 255, 0.7)'; // Xanh dương
+        } else if (surfaceElev >= 0.2) {
+            return 'rgba(0, 50, 200, 0.7)'; // Xanh dương đậm
+        } else if (surfaceElev >= 0.1) {
+            return 'rgba(0, 0, 150, 0.7)'; // Xanh đậm
+        } else {
+            return 'rgba(50, 0, 100, 0.7)'; // Tím - thấp nhất
         }
     },
 
@@ -754,6 +1519,238 @@ L.CanvasHydroLayer = L.Layer.extend({
         if (this._canvas) {
             const ctx = this._canvas.getContext('2d');
             ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+        }
+    },
+
+    /**
+     * Tạo legend (bảng màu) giống MIKE Zero
+     */
+    _createLegend: function () {
+        // Xóa legend cũ nếu có
+        this._removeLegend();
+
+        // Tạo container cho legend
+        this._legendContainer = L.DomUtil.create('div', 'leaflet-legend-container');
+        this._legendContainer.style.cssText = `
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            min-width: 180px;
+            font-family: Arial, sans-serif;
+        `;
+
+        // Thêm vào map container
+        const mapContainer = this._map.getContainer();
+        mapContainer.appendChild(this._legendContainer);
+
+        // Cập nhật legend
+        this._updateLegend();
+    },
+
+    /**
+     * Cập nhật nội dung legend
+     */
+    _updateLegend: function () {
+        if (!this._legendContainer) return;
+
+        // Clear nội dung cũ
+        this._legendContainer.innerHTML = '';
+
+        const fieldName = this._colorField === 'surface_elev' ? 'Surface elevation [m]' : 'Total depth [m]';
+
+        // Tạo title
+        const title = L.DomUtil.create('div', 'legend-title', this._legendContainer);
+        title.style.cssText = `
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+            border-bottom: 2px solid #0066cc;
+            padding-bottom: 5px;
+        `;
+        title.textContent = fieldName;
+
+        // Container cho gradient và labels (layout ngang)
+        const gradientWrapper = L.DomUtil.create('div', 'legend-gradient-wrapper', this._legendContainer);
+        gradientWrapper.style.cssText = `
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        `;
+
+        // Tạo gradient bar container
+        const gradientContainer = L.DomUtil.create('div', 'legend-gradient', gradientWrapper);
+        gradientContainer.style.cssText = `
+            width: 30px;
+            height: 200px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        `;
+
+        // Tạo gradient canvas
+        const gradientCanvas = L.DomUtil.create('canvas', '', gradientContainer);
+        gradientCanvas.width = 30;
+        gradientCanvas.height = 200;
+        gradientCanvas.style.cssText = `
+            width: 100%;
+            height: 100%;
+            display: block;
+        `;
+
+        const ctx = gradientCanvas.getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+
+        // Tạo gradient dựa trên colorField
+        if (this._colorField === 'surface_elev') {
+            // Gradient cho surface elevation: Red -> Orange -> Yellow -> Green -> Blue -> Purple
+            gradient.addColorStop(0, 'rgba(255, 0, 0, 0.7)');      // Red (1.5+)
+            gradient.addColorStop(0.1, 'rgba(255, 100, 0, 0.7)');  // Orange
+            gradient.addColorStop(0.2, 'rgba(255, 180, 0, 0.7)');  // Yellow-orange
+            gradient.addColorStop(0.3, 'rgba(255, 220, 0, 0.7)');  // Yellow
+            gradient.addColorStop(0.4, 'rgba(200, 255, 0, 0.7)');  // Yellow-green
+            gradient.addColorStop(0.5, 'rgba(100, 255, 0, 0.7)');  // Green
+            gradient.addColorStop(0.6, 'rgba(0, 255, 100, 0.7)'); // Green-blue
+            gradient.addColorStop(0.7, 'rgba(0, 200, 150, 0.7)'); // Cyan
+            gradient.addColorStop(0.8, 'rgba(0, 150, 200, 0.7)'); // Light blue
+            gradient.addColorStop(0.9, 'rgba(0, 100, 255, 0.7)'); // Blue
+            gradient.addColorStop(1, 'rgba(50, 0, 100, 0.7)');   // Purple
+        } else {
+            // Gradient cho total depth: Light blue -> Blue -> Dark blue
+            gradient.addColorStop(0, 'rgba(204, 255, 255, 0.5)');  // Very light blue
+            gradient.addColorStop(0.2, 'rgba(102, 255, 255, 0.6)'); // Light blue
+            gradient.addColorStop(0.4, 'rgba(0, 204, 255, 0.6)'); // Cyan
+            gradient.addColorStop(0.6, 'rgba(0, 102, 255, 0.6)'); // Light blue
+            gradient.addColorStop(0.8, 'rgba(0, 0, 255, 0.6)');   // Blue
+            gradient.addColorStop(1, 'rgba(0, 0, 128, 0.6)');     // Dark blue
+        }
+
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 30, 200);
+
+        // Tạo labels cho các mức giá trị (bên cạnh gradient)
+        const labelsContainer = L.DomUtil.create('div', 'legend-labels', gradientWrapper);
+        labelsContainer.style.cssText = `
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #333;
+            flex: 1;
+            padding: 2px 0;
+        `;
+
+        // Tạo labels dựa trên colorField
+        let labels = [];
+        if (this._colorField === 'surface_elev') {
+            labels = [
+                { value: '≥ 1.5', position: 0 },
+                { value: '1.4 - 1.5', position: 0.1 },
+                { value: '1.3 - 1.4', position: 0.2 },
+                { value: '1.2 - 1.3', position: 0.3 },
+                { value: '1.1 - 1.2', position: 0.4 },
+                { value: '1.0 - 1.1', position: 0.5 },
+                { value: '0.9 - 1.0', position: 0.6 },
+                { value: '0.8 - 0.9', position: 0.7 },
+                { value: '0.7 - 0.8', position: 0.8 },
+                { value: '0.6 - 0.7', position: 0.9 },
+                { value: '0.5 - 0.6', position: 0.95 },
+                { value: '0.4 - 0.5', position: 0.98 },
+                { value: '0.3 - 0.4', position: 0.99 },
+                { value: '0.2 - 0.3', position: 0.995 },
+                { value: '0.1 - 0.2', position: 0.998 },
+                { value: '< 0.1', position: 1 }
+            ];
+        } else {
+            labels = [
+                { value: '≥ 5.0', position: 0 },
+                { value: '3.0 - 5.0', position: 0.2 },
+                { value: '2.0 - 3.0', position: 0.4 },
+                { value: '1.0 - 2.0', position: 0.6 },
+                { value: '0.5 - 1.0', position: 0.8 },
+                { value: '< 0.5', position: 1 }
+            ];
+        }
+
+        // Hiển thị labels quan trọng (chọn một số để không quá dày)
+        let importantLabels = [];
+        if (this._colorField === 'surface_elev') {
+            // Chọn các labels quan trọng: đầu, giữa, cuối
+            importantLabels = [
+                labels[0],  // ≥ 1.5
+                labels[3],  // 1.2 - 1.3
+                labels[5],  // 1.0 - 1.1
+                labels[7],  // 0.8 - 0.9
+                labels[9],  // 0.6 - 0.7
+                labels[11], // 0.4 - 0.5
+                labels[13], // 0.2 - 0.3
+                labels[labels.length - 1] // < 0.1
+            ];
+        } else {
+            importantLabels = labels;
+        }
+
+        importantLabels.forEach((label, index) => {
+            const labelDiv = L.DomUtil.create('div', 'legend-label', labelsContainer);
+            labelDiv.style.cssText = `
+                padding: 1px 0;
+                line-height: 1.2;
+            `;
+            labelDiv.textContent = label.value;
+        });
+
+        // Thêm label "Undefined Value" nếu cần
+        const undefinedLabel = L.DomUtil.create('div', 'legend-undefined', this._legendContainer);
+        undefinedLabel.style.cssText = `
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            font-size: 11px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        `;
+        const undefinedColorBox = L.DomUtil.create('div', '', undefinedLabel);
+        undefinedColorBox.style.cssText = `
+            width: 14px;
+            height: 14px;
+            background: rgba(224, 224, 224, 0.3);
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            border-radius: 2px;
+        `;
+        const undefinedText = L.DomUtil.create('span', '', undefinedLabel);
+        undefinedText.textContent = 'Undefined Value';
+    },
+
+    /**
+     * Xóa legend
+     */
+    _removeLegend: function () {
+        if (this._legendContainer && this._legendContainer.parentNode) {
+            this._legendContainer.parentNode.removeChild(this._legendContainer);
+        }
+        this._legendContainer = null;
+    },
+
+    /**
+     * Hiển thị/ẩn legend
+     */
+    toggleLegend: function () {
+        this._showLegend = !this._showLegend;
+        if (this._showLegend) {
+            this._createLegend();
+        } else {
+            this._removeLegend();
         }
     }
 });
@@ -1090,20 +2087,53 @@ async function fetchAndShowMoHinhThuyLuc2DCanvas(startDate = null, endDateOrOpti
             // Lưu vào biến global
             currentSelectedDateRangeCanvas = { startDate: selectedStartDate, endDate: selectedEndDate };
 
-            // 2. Tạo hoặc clear canvas layer
+            // 2. Tạo hoặc clear layer (sử dụng Heat nếu được yêu cầu, ngược lại dùng Canvas)
+            const useHeat = options.useHeat !== false; // Mặc định dùng Heat (nhanh hơn)
+
             if (!moHinhThuyLuc2DCanvasLayer) {
-                console.log('🎨 Bước 2: Tạo Canvas layer...');
-                moHinhThuyLuc2DCanvasLayer = L.canvasHydroLayer({
-                    opacity: options.opacity || 0.7,
-                    gridResolution: options.gridResolution || 5,
-                    idwPower: options.idwPower || 2,
-                    idwRadius: options.idwRadius || 100,
-                    arrowScale: options.arrowScale || 50,
-                    arrowSpacing: options.arrowSpacing || 30
-                });
+                if (useHeat && typeof L.heatLayer !== 'undefined') {
+                    console.log('🔥 Bước 2: Tạo Heat layer (Leaflet.heat - nhanh hơn)...');
+                    moHinhThuyLuc2DCanvasLayer = L.heatHydroLayer({
+                        colorField: options.colorField || 'total_depth',
+                        arrowColor: options.arrowColor || 'speed',
+                        arrowScale: options.arrowScale || 50,
+                        arrowSpacing: options.arrowSpacing || 30,
+                        heatRadius: options.heatRadius || 25,
+                        heatBlur: options.heatBlur || 15,
+                        heatMaxZoom: options.heatMaxZoom || 18,
+                        heatMinOpacity: options.heatMinOpacity || 0.3,
+                        showLegend: options.showLegend !== false,
+                        animationSpeed: options.animationSpeed || 500
+                    });
+                } else {
+                    console.log('🎨 Bước 2: Tạo Canvas layer...');
+                    moHinhThuyLuc2DCanvasLayer = L.canvasHydroLayer({
+                        opacity: options.opacity || 0.7,
+                        gridResolution: options.gridResolution || 5,
+                        idwPower: options.idwPower || 2,
+                        idwRadius: options.idwRadius || 100,
+                        arrowScale: options.arrowScale || 50,
+                        arrowSpacing: options.arrowSpacing || 30,
+                        colorField: options.colorField || 'total_depth',
+                        arrowColor: options.arrowColor || 'speed',
+                        showLegend: options.showLegend !== false,
+                        animationSpeed: options.animationSpeed || 500
+                    });
+                }
                 moHinhThuyLuc2DCanvasLayer.addTo(mymap);
                 window.moHinhThuyLuc2DCanvasLayer = moHinhThuyLuc2DCanvasLayer;
             } else {
+                // Cập nhật options nếu có
+                if (options.colorField) {
+                    moHinhThuyLuc2DCanvasLayer._colorField = options.colorField;
+                    // Cập nhật legend nếu đang hiển thị
+                    if (moHinhThuyLuc2DCanvasLayer._showLegend && moHinhThuyLuc2DCanvasLayer._legendContainer) {
+                        moHinhThuyLuc2DCanvasLayer._updateLegend();
+                    }
+                }
+                if (options.arrowColor) {
+                    moHinhThuyLuc2DCanvasLayer._arrowColor = options.arrowColor;
+                }
                 moHinhThuyLuc2DCanvasLayer.clearData();
             }
 
@@ -1159,6 +2189,7 @@ async function fetchAndShowMoHinhThuyLuc2DCanvas(startDate = null, endDateOrOpti
                     lat: coords.lat,
                     lng: coords.lng,
                     total_depth: item.total_depth || 0,
+                    surface_elev: item.surface_elev != null ? item.surface_elev : null, // Thêm surface_elev
                     u: item.u || 0,
                     v: item.v || 0,
                     direction: direction,
@@ -1172,6 +2203,11 @@ async function fetchAndShowMoHinhThuyLuc2DCanvas(startDate = null, endDateOrOpti
             // 7. Set dữ liệu vào Canvas layer (sẽ tự động vẽ và bắt đầu animation)
             console.log('🎨 Bước 7: Vẽ Canvas layer và bắt đầu animation...');
             moHinhThuyLuc2DCanvasLayer.setData(canvasData, true); // true = autoAnimate
+
+            // Cập nhật legend nếu đang hiển thị
+            if (moHinhThuyLuc2DCanvasLayer._showLegend && moHinhThuyLuc2DCanvasLayer._legendContainer) {
+                moHinhThuyLuc2DCanvasLayer._updateLegend();
+            }
 
             // Đảm bảo map được invalidate để trigger redraw
             if (mymap) {
@@ -1399,7 +2435,11 @@ window.closeTimeSlider2DCanvas = closeTimeSlider2DCanvas;
 window.stepTimeBackwardCanvas = stepTimeBackwardCanvas;
 window.stepTimeForwardCanvas = stepTimeForwardCanvas;
 window.removeMoHinhThuyLuc2DCanvasLayer = removeMoHinhThuyLuc2DCanvasLayer;
+window.toggleLegend2DCanvas = function () {
+    if (moHinhThuyLuc2DCanvasLayer) {
+        moHinhThuyLuc2DCanvasLayer.toggleLegend();
+    }
+};
 window.L = window.L || {}; // Đảm bảo L tồn tại
 window.L.CanvasHydroLayer = L.CanvasHydroLayer;
 window.L.canvasHydroLayer = L.canvasHydroLayer;
-

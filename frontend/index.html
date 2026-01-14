@@ -28,24 +28,28 @@
                     Thêm lớp <span class="dropdown-arrow">▼</span>
                 </button>
                 <div class="dropdown-menu" id="layerDropdownMenu">
-                    <div class="dropdown-item" data-layer="elements-hydro">
+                    <!-- <div class="dropdown-item" data-layer="elements-hydro">
                         <span class="layer-name">Lưới thủy lực + Dữ liệu thủy động lực</span>
                         <button class="table-toggle-btn" data-layer="elements-hydro" disabled>📊</button>
                     </div>
                     <div class="dropdown-item" data-layer="mo-hinh-thuy-luc-2d">
                         <span class="layer-name">Mô hình thủy lực 2D</span>
                         <button class="table-toggle-btn" data-layer="mo-hinh-thuy-luc-2d" disabled>📊</button>
-                    </div>
+                    </div> -->
                     <div class="dropdown-item" data-layer="mo-hinh-thuy-luc-2d-canvas">
                         <span class="layer-name">Mô hình thủy lực 2D (Canvas)</span>
                         <button class="table-toggle-btn" data-layer="mo-hinh-thuy-luc-2d-canvas" disabled>📊</button>
+                    </div>
+                    <div class="dropdown-item" data-layer="mo-hinh-thuy-luc-2d-contour">
+                        <span class="layer-name">Mô hình thủy lực 2D (Contour Lines)</span>
+                        <button class="table-toggle-btn" data-layer="mo-hinh-thuy-luc-2d-contour" disabled>📊</button>
                     </div>
                     <div class="dropdown-item" data-layer="cong">
                         <span class="layer-name">Cống</span>
                         <button class="table-toggle-btn" data-layer="cong" disabled>📊</button>
                     </div>
                     <div class="dropdown-item" data-layer="chatluong">
-                        <span class="layer-name">Chất lượng</span>
+                        <span class="layer-name">Bờ bao</span>
                         <button class="table-toggle-btn" data-layer="chatluong" disabled>📊</button>
                     </div>
                     <div class="dropdown-item" data-layer="debao">
@@ -435,7 +439,7 @@
 
         <div id="chatluong-table-header" class="data-table-header">
             <div class="data-table-title-container">
-                <h4 class="data-table-title">📊 Bảng dữ liệu Chất lượng</h4>
+                <h4 class="data-table-title">📊 Bảng dữ liệu Bờ Bao</h4>
                 <button onclick="closeChatLuongTable()" class="data-table-close-btn">✕</button>
             </div>
             <div class="data-table-controls">
@@ -828,6 +832,10 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/d3-contour.v1.min.js"></script>
     <script src="weather.js"></script>
     <script src="weather-drag.js"></script>
     <script src="main.js"></script>
@@ -835,6 +843,7 @@
     <script src="layers/layer_elements_hydro.js"></script>
     <script src="layers/layer_mo_hinh_thuy_luc_2d.js"></script>
     <script src="layers/layer_mo_hinh_thuy_luc_2d_canvas.js"></script>
+    <script src="layers/layer_mo_hinh_thuy_luc_2d_contour.js"></script>
     <script src="layers/layer_cong.js"></script>
     <script src="layers/layer_chatluong.js"></script>
     <script src="layers/layer_debao.js"></script>

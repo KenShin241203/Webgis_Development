@@ -242,6 +242,11 @@ document.addEventListener('DOMContentLoaded', function () {
             fetchFunction: 'fetchAndShowMoHinhThuyLuc2DCanvas',
             tableToggleId: null
         },
+        'mo-hinh-thuy-luc-2d-contour': {
+            layerGroup: window.moHinhThuyLuc2DContourLayer,
+            fetchFunction: 'fetchAndShowMoHinhThuyLuc2DContour',
+            tableToggleId: null
+        },
         'cong': {
             layerGroup: window.congLayerGroup,
             fetchFunction: 'fetchAndShowCong',
@@ -402,6 +407,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     window.removeMoHinhThuyLuc2DCanvasLayer();
                 }
             }
+            if (layerKey === 'mo-hinh-thuy-luc-2d-contour') {
+                // Ẩn time slider khi tắt layer
+                if (typeof window.closeTimeSlider2DCanvas === 'function') {
+                    window.closeTimeSlider2DCanvas();
+                }
+                // Xóa Contour layer
+                if (typeof window.removeMoHinhThuyLuc2DContourLayer === 'function') {
+                    window.removeMoHinhThuyLuc2DContourLayer();
+                }
+            }
 
             // Tắt layer hiện tại
             const config = layerConfig[layerKey];
@@ -516,6 +531,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     window.removeMoHinhThuyLuc2DCanvasLayer();
                 }
             }
+            if (currentActiveLayer === 'mo-hinh-thuy-luc-2d-contour') {
+                // Đóng time slider khi chuyển layer
+                if (typeof window.closeTimeSlider2DCanvas === 'function') {
+                    window.closeTimeSlider2DCanvas();
+                }
+                // Xóa Contour layer
+                if (typeof window.removeMoHinhThuyLuc2DContourLayer === 'function') {
+                    window.removeMoHinhThuyLuc2DContourLayer();
+                }
+            }
 
             if (needToCloseTable) {
                 alert(`Vui lòng đóng bảng dữ liệu ${currentOpenTable} trước khi chuyển layer!`);
@@ -611,6 +636,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 }).catch(onLayerError);
             } else if (layerKey === 'mo-hinh-thuy-luc-2d-canvas') {
                 // Chỉ hiển thị date picker, không fetch data ngay
+                if (typeof window.showTimeSlider2DCanvas === 'function') {
+                    window.showTimeSlider2DCanvas();
+                }
+                // Không fetch data, chỉ hiển thị UI để user chọn khoảng thời gian
+                onLayerLoaded();
+            } else if (layerKey === 'mo-hinh-thuy-luc-2d-contour') {
+                // Chỉ hiển thị date picker, không fetch data ngay (dùng chung date picker với canvas)
                 if (typeof window.showTimeSlider2DCanvas === 'function') {
                     window.showTimeSlider2DCanvas();
                 }

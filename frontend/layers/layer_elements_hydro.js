@@ -54,6 +54,7 @@ async function getElementsCoordinatesForHydro() {
             if (json.data) {
                 json.data.forEach(item => {
                     if (item.geometry && item.geometry.type === 'Point') {
+                        // Sử dụng tọa độ trực tiếp từ database (đã đúng hệ tọa độ)
                         const lng = item.geometry.coordinates[0];
                         const lat = item.geometry.coordinates[1];
                         elementsCoordinatesCache[item.element_id] = { lat, lng };
@@ -170,6 +171,7 @@ function fetchAndShowElementsAndHydro(elementsPageSize = 500, hydroPageSize = 50
             console.log(`📍 Bước 2: Render ${elementsJson.data.length} Elements markers...`);
             elementsJson.data.forEach((item) => {
                 if (item.geometry && item.geometry.type === 'Point') {
+                    // Sử dụng tọa độ trực tiếp từ database (đã đúng hệ tọa độ)
                     const lng = item.geometry.coordinates[0];
                     const lat = item.geometry.coordinates[1];
 

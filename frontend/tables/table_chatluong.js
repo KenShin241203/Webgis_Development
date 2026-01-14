@@ -1,4 +1,4 @@
-// ===== TABLE CHẤT LƯỢNG - LOGIC ===== //
+// ===== TABLE Bờ bao - LOGIC ===== //
 
 // Biến để lưu trạng thái drag
 let isDraggingChatLuong = false;
@@ -22,7 +22,7 @@ let currentChatLuongPage = 1;
 let currentChatLuongPageSize = 100;
 let isCoordinateSearchChatLuong = false;
 
-// Hàm cập nhật bảng dữ liệu chất lượng
+// Hàm cập nhật bảng dữ liệu Bờ bao
 function updateChatLuongTable(data, pagination) {
     try {
         const tableContainer = document.getElementById('chatluong-table-container');
@@ -40,7 +40,7 @@ function updateChatLuongTable(data, pagination) {
         console.log('Data to display:', data);
 
         if (!tableContainer || !table || !tbody) {
-            console.error('Không tìm thấy các element cần thiết cho bảng chất lượng');
+            console.error('Không tìm thấy các element cần thiết cho bảng Bờ bao');
             return;
         }
 
@@ -80,9 +80,9 @@ function updateChatLuongTable(data, pagination) {
         // Render phân trang
         renderChatLuongPagination(pagination);
 
-        console.log('Đã cập nhật bảng chất lượng với', data.length, 'dòng dữ liệu');
+        console.log('Đã cập nhật bảng Bờ bao với', data.length, 'dòng dữ liệu');
     } catch (error) {
-        console.error('Lỗi khi cập nhật bảng chất lượng:', error);
+        console.error('Lỗi khi cập nhật bảng Bờ bao:', error);
     }
 }
 
@@ -106,11 +106,11 @@ function updateChatLuongData(page = currentChatLuongPage) {
     }
 
     // Frontend không tự tính lại page nữa; backend chuẩn hóa phân trang
-    console.log('Cập nhật dữ liệu chất lượng với pageSize:', newPageSize, 'page:', page);
+    console.log('Cập nhật dữ liệu Bờ bao với pageSize:', newPageSize, 'page:', page);
     fetchAndShowChatLuong(newPageSize, page);
 }
 
-// Hàm để mở/đóng bảng dữ liệu chất lượng
+// Hàm để mở/đóng bảng dữ liệu Bờ bao
 function toggleChatLuongTable() {
     const container = document.getElementById('chatluong-table-container');
     const toggleBtn = document.querySelector('.table-toggle-btn[data-layer="chatluong"]');
@@ -129,14 +129,14 @@ function toggleChatLuongTable() {
         const pageSize = parseInt(pageSizeInput.value) || 100;
         fetchAndShowChatLuong(pageSize);
 
-        console.log('Đã mở bảng dữ liệu chất lượng');
+        console.log('Đã mở bảng dữ liệu Bờ bao');
     } else {
         // Đóng bảng
         closeChatLuongTable();
     }
 }
 
-// Hàm để đóng bảng dữ liệu chất lượng
+// Hàm để đóng bảng dữ liệu Bờ bao
 function closeChatLuongTable() {
     const container = document.getElementById('chatluong-table-container');
     const toggleBtn = document.querySelector('.table-toggle-btn[data-layer="chatluong"]');
@@ -151,7 +151,7 @@ function closeChatLuongTable() {
     }
 
     isChatLuongTableOpen = false;
-    console.log('Đã đóng bảng dữ liệu chất lượng');
+    console.log('Đã đóng bảng dữ liệu Bờ bao');
 }
 
 // Hàm để enable/disable nút toggle bảng dữ liệu
@@ -209,7 +209,7 @@ function updateChatLuongActionButtons() {
 
 // Thêm bản ghi mới
 function addChatLuongRecord() {
-    const modal = createChatLuongFormModal('Thêm Chất lượng', null);
+    const modal = createChatLuongFormModal('Thêm Bờ bao', null);
     document.body.appendChild(modal);
     setTimeout(() => {
         modal.style.display = 'flex';
@@ -222,7 +222,7 @@ function editChatLuongRecord() {
         alert('Vui lòng chọn một dòng để sửa');
         return;
     }
-    const modal = createChatLuongFormModal('Sửa Chất lượng', selectedChatLuongRow);
+    const modal = createChatLuongFormModal('Sửa Bờ bao', selectedChatLuongRow);
     document.body.appendChild(modal);
     setTimeout(() => {
         modal.style.display = 'flex';
@@ -241,7 +241,7 @@ function deleteChatLuongRecord() {
     }
 }
 
-// Tạo modal form cho Chất lượng
+// Tạo modal form cho Bờ bao
 function createChatLuongFormModal(title, data) {
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
@@ -349,16 +349,16 @@ async function addChatLuongToServer(data) {
         });
 
         if (response.ok) {
-            alert('Thêm bản ghi Chất lượng thành công!');
+            alert('Thêm bản ghi Bờ bao thành công!');
             const pageSizeInput = document.getElementById('chatluong-pageSize');
             const pageSize = parseInt(pageSizeInput.value) || 100;
             fetchAndShowChatLuong(pageSize);
         } else {
-            alert('Lỗi khi thêm Chất lượng: ' + response.statusText);
+            alert('Lỗi khi thêm Bờ bao: ' + response.statusText);
         }
     } catch (error) {
-        console.error('Lỗi khi thêm Chất lượng:', error);
-        alert('Lỗi kết nối khi thêm Chất lượng');
+        console.error('Lỗi khi thêm Bờ bao:', error);
+        alert('Lỗi kết nối khi thêm Bờ bao');
     }
 }
 
@@ -375,16 +375,16 @@ async function updateChatLuongOnServer(id, data) {
         });
 
         if (response.ok) {
-            alert('Cập nhật Chất lượng thành công!');
+            alert('Cập nhật Bờ bao thành công!');
             const pageSizeInput = document.getElementById('chatluong-pageSize');
             const pageSize = parseInt(pageSizeInput.value) || 100;
             fetchAndShowChatLuong(pageSize);
         } else {
-            alert('Lỗi khi cập nhật Chất lượng: ' + response.statusText);
+            alert('Lỗi khi cập nhật Bờ bao: ' + response.statusText);
         }
     } catch (error) {
-        console.error('Lỗi khi cập nhật Chất lượng:', error);
-        alert('Lỗi kết nối khi cập nhật Chất lượng');
+        console.error('Lỗi khi cập nhật Bờ bao:', error);
+        alert('Lỗi kết nối khi cập nhật Bờ bao');
     }
 }
 
@@ -399,21 +399,21 @@ async function deleteChatLuongFromServer(id) {
         });
 
         if (response.ok) {
-            alert('Xóa Chất lượng thành công!');
+            alert('Xóa Bờ bao thành công!');
             selectedChatLuongRow = null;
             const pageSizeInput = document.getElementById('chatluong-pageSize');
             const pageSize = parseInt(pageSizeInput.value) || 100;
             fetchAndShowChatLuong(pageSize);
         } else {
-            alert('Lỗi khi xóa Chất lượng: ' + response.statusText);
+            alert('Lỗi khi xóa Bờ bao: ' + response.statusText);
         }
     } catch (error) {
-        console.error('Lỗi khi xóa Chất lượng:', error);
-        alert('Lỗi kết nối khi xóa Chất lượng');
+        console.error('Lỗi khi xóa Bờ bao:', error);
+        alert('Lỗi kết nối khi xóa Bờ bao');
     }
 }
 
-// Hàm để thiết lập drag and drop cho bảng chất lượng
+// Hàm để thiết lập drag and drop cho bảng Bờ bao
 function setupChatLuongDragAndDrop() {
     const container = document.getElementById('chatluong-table-container');
     const header = document.getElementById('chatluong-table-header');
@@ -469,7 +469,7 @@ function setupChatLuongDragAndDrop() {
     });
 }
 
-// Hàm để thiết lập resize cho bảng chất lượng
+// Hàm để thiết lập resize cho bảng Bờ bao
 function setupChatLuongResize() {
     const container = document.getElementById('chatluong-table-container');
     const resizeHandles = container.querySelectorAll('.resize-handle');
@@ -550,7 +550,7 @@ function setupChatLuongResize() {
     });
 }
 
-// Khởi tạo table chất lượng
+// Khởi tạo table Bờ bao
 function renderChatLuongPagination(pagination) {
     const paginationContainer = document.getElementById('chatluong-pagination');
     if (!paginationContainer) return;
@@ -618,7 +618,7 @@ function searchChatLuongData() {
         const pageSize = parseInt(pageSizeInput?.value) || 100;
         searchChatLuongByCoordinates(coords.lat, coords.lng, coords.radius, pageSize, 1)
             .catch(err => {
-                console.error('Lỗi khi tìm kiếm chất lượng theo tọa độ:', err);
+                console.error('Lỗi khi tìm kiếm Bờ bao theo tọa độ:', err);
                 alert('Lỗi khi tìm kiếm theo tọa độ: ' + err.message);
             });
         return;
