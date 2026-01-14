@@ -1563,7 +1563,7 @@ L.CanvasHydroLayer = L.Layer.extend({
         // Clear nội dung cũ
         this._legendContainer.innerHTML = '';
 
-        const fieldName = this._colorField === 'surface_elev' ? 'Surface elevation [m]' : 'Total depth [m]';
+        const fieldName = this._colorField === 'surface_elev' ? 'Độ cao bề mặt [m]' : 'Tổng độ sâu [m]';
 
         // Tạo title
         const title = L.DomUtil.create('div', 'legend-title', this._legendContainer);
