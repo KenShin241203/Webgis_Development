@@ -18,5 +18,5 @@ ENV PORT_SERVER=3000
 
 EXPOSE 3000
 
-# Start: seed auth (non-fatal if already seeded), then start server
-CMD ["sh", "-c", "node src/scripts/initializeAuth.js || true; node index.js"] 
+# Start: seed auth (non-fatal if already seeded), then start server with increased heap size
+CMD ["sh", "-c", "node src/scripts/initializeAuth.js || true; node --max-old-space-size=4096 index.js"] 

@@ -66,22 +66,26 @@ const getAllHydroData = async ({
             ? `WHERE ${whereConditions.join(' AND ')}`
             : '';
 
-        // Logic: Nếu query theo khoảng thời gian (có startTime hoặc endTime), lấy TẤT CẢ dữ liệu
+        // Logic: Nếu query theo khoảng thời gian (có startTime hoặc endTime), lấy dữ liệu với giới hạn an toàn
         // Nếu không, dùng pageSize như bình thường
         const isDateRangeQuery = startTime || endTime;
         let limitClause = '';
         let safePageSize = null;
+        const MAX_DATE_RANGE_RECORDS = 200000; // Giới hạn tối đa 200k records cho date range query để tránh OOM
 
         if (isDateRangeQuery) {
-            // Query theo khoảng thời gian: không dùng LIMIT, lấy tất cả dữ liệu
+            // Query theo khoảng thời gian: dùng giới hạn an toàn để tránh heap out of memory
             // Ước tính: mỗi ngày có khoảng 24 timesteps, mỗi timestep ~45k records
-            // Tổng cộng ~1.08M records/ngày, nhưng để an toàn không giới hạn
+            // Tổng cộng ~1.08M records/ngày, nhưng giới hạn 200k để tránh OOM
+            safePageSize = MAX_DATE_RANGE_RECORDS;
+            limitClause = `LIMIT $${paramIndex}`;
+            replacements.push(safePageSize + 1); // Lấy thêm 1 để kiểm tra hasMore
             const rangeStr = startTime && endTime
                 ? `${new Date(startTime).toISOString()} đến ${new Date(endTime).toISOString()}`
                 : startTime
                     ? `từ ${new Date(startTime).toISOString()}`
                     : `đến ${new Date(endTime).toISOString()}`;
-            console.log(`📅 Query theo khoảng thời gian (${rangeStr}): lấy TẤT CẢ dữ liệu`);
+            console.log(`📅 Query theo khoảng thời gian (${rangeStr}): giới hạn ${MAX_DATE_RANGE_RECORDS} records để tránh OOM`);
         } else {
             // Query bình thường: dùng pageSize
             safePageSize = Math.min(Math.max(1, parseInt(pageSize) || 1000), 50000);
@@ -121,15 +125,27 @@ const getAllHydroData = async ({
         let nextCursor = null;
 
         if (isDateRangeQuery) {
-            // Query theo khoảng thời gian: trả về tất cả dữ liệu, không có pagination
-            hasMore = false;
-            nextCursor = null;
+            // Query theo khoảng thời gian: xử lý pagination với giới hạn an toàn
+            hasMore = data.length > safePageSize;
+            actualData = hasMore ? data.slice(0, safePageSize) : data;
+
+            // Tạo cursor cho trang tiếp theo nếu có nhiều dữ liệu hơn
+            if (hasMore && actualData.length > 0) {
+                const lastItem = actualData[actualData.length - 1];
+                nextCursor = `${lastItem.time.toISOString()},${lastItem.element_id}`;
+            }
+
             const rangeStr = startTime && endTime
                 ? `${new Date(startTime).toISOString()} đến ${new Date(endTime).toISOString()}`
                 : startTime
                     ? `từ ${new Date(startTime).toISOString()}`
                     : `đến ${new Date(endTime).toISOString()}`;
-            console.log(`✅ Đã lấy ${data.length} records trong khoảng thời gian (${rangeStr})`);
+
+            if (hasMore) {
+                console.log(`⚠️ Đã lấy ${actualData.length} records (giới hạn ${MAX_DATE_RANGE_RECORDS}), còn nhiều dữ liệu hơn. Sử dụng cursor để lấy tiếp.`);
+            } else {
+                console.log(`✅ Đã lấy ${data.length} records trong khoảng thời gian (${rangeStr})`);
+            }
         } else {
             // Query bình thường: xử lý pagination
             hasMore = data.length > safePageSize;

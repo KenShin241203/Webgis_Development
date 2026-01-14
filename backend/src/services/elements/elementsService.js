@@ -263,5 +263,3 @@ module.exports = {
     getElementById,
     getElementsByIds
 };
-
-
