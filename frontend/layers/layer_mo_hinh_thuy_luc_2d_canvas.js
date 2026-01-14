@@ -2,6 +2,167 @@
 // Layer hiển thị mô hình thủy lực 2D bằng Canvas với IDW interpolation và vector arrows
 // HOẶC Leaflet.heat (nhanh hơn) + Canvas arrows
 
+// ===== CANVAS ARROW LAYER (ĐỂ VẼ MŨI TÊN) ===== //
+/**
+ * Custom Canvas Layer cho arrows - Leaflet tự động quản lý position
+ */
+L.CanvasArrowLayer = L.Layer.extend({
+    initialize: function (options) {
+        L.setOptions(this, options);
+        this._canvas = null;
+        this._data = [];
+        this._topLeft = null; // layerPoint của góc (0,0) container tại thời điểm hiện tại
+    },
+
+    onAdd: function (map) {
+        this._map = map;
+        if (!this._canvas) {
+            this._canvas = L.DomUtil.create('canvas', 'leaflet-arrow-canvas');
+            this._canvas.style.pointerEvents = 'none';
+        }
+        this.getPane().appendChild(this._canvas);
+        this._reset(); // set vị trí canvas + vẽ
+
+        // Chỉ redraw khi kết thúc thao tác để tránh jitter/lệch trong lúc Leaflet đang transform pane
+        map.on('viewreset', this._reset, this);
+        map.on('moveend', this._reset, this);
+        map.on('zoomend', this._reset, this);
+    },
+
+    onRemove: function (map) {
+        map.off('viewreset', this._reset, this);
+        map.off('moveend', this._reset, this);
+        map.off('zoomend', this._reset, this);
+        if (this._canvas && this._canvas.parentNode) {
+            this._canvas.parentNode.removeChild(this._canvas);
+        }
+    },
+
+    getPane: function () {
+        return this._map.getPane(this.options.pane || 'overlayPane');
+    },
+
+    _reset: function () {
+        if (!this._map || !this._canvas) return;
+
+        // Neo canvas theo layer coordinate system:
+        // đặt canvas tại topLeft của viewport trong hệ layerPoint, rồi vẽ theo latLngToLayerPoint - topLeft
+        this._topLeft = this._map.containerPointToLayerPoint([0, 0]);
+        L.DomUtil.setPosition(this._canvas, this._topLeft);
+
+        const size = this._map.getSize();
+        const pixelRatio = window.devicePixelRatio || 1;
+
+        this._canvas.width = size.x * pixelRatio;
+        this._canvas.height = size.y * pixelRatio;
+        this._canvas.style.width = size.x + 'px';
+        this._canvas.style.height = size.y + 'px';
+
+        const ctx = this._canvas.getContext('2d');
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.scale(pixelRatio, pixelRatio);
+
+        this._draw();
+    },
+
+    setData: function (data, map, options) {
+        this._data = data || [];
+        this._map = map;
+        this._options = options || {};
+        if (this._canvas) {
+            this._reset();
+        }
+    },
+
+    _draw: function () {
+        if (!this._canvas || !this._map || this._data.length === 0) return;
+
+        const ctx = this._canvas.getContext('2d');
+        const size = this._map.getSize();
+        ctx.clearRect(0, 0, size.x, size.y);
+
+        const bounds = this._map.getBounds();
+        const arrowScale = this._options.arrowScale || 50;
+        const arrowColor = this._options.arrowColor || 'speed';
+        const topLeft = this._topLeft || this._map.containerPointToLayerPoint([0, 0]);
+
+        // Lọc dữ liệu trong viewport
+        const visibleData = this._data.filter(point => {
+            return point.lat >= bounds.getSouth() && point.lat <= bounds.getNorth() &&
+                point.lng >= bounds.getWest() && point.lng <= bounds.getEast() &&
+                point.direction != null && point.speed > 0;
+        });
+
+        if (visibleData.length === 0) return;
+
+        // Sampling
+        const maxArrows = 2000;
+        let sampledData = visibleData;
+        if (visibleData.length > maxArrows) {
+            const step = Math.ceil(visibleData.length / maxArrows);
+            sampledData = visibleData.filter((_, i) => i % step === 0);
+        }
+
+        // Vẽ arrows
+        ctx.save();
+        sampledData.forEach(point => {
+            // vẽ theo layerPoint để "neo" đúng theo tọa độ địa lý khi map/pane transform
+            const lp = this._map.latLngToLayerPoint([point.lat, point.lng]);
+            const x = lp.x - topLeft.x;
+            const y = lp.y - topLeft.y;
+            if (x >= 0 && x <= size.x && y >= 0 && y <= size.y) {
+                const color = arrowColor === 'speed'
+                    ? this._getColorBySpeed(point.speed)
+                    : arrowColor === 'black'
+                        ? '#000000'
+                        : arrowColor;
+                this._drawArrow(ctx, x, y, point.direction, point.speed, arrowScale, color);
+            }
+        });
+        ctx.restore();
+    },
+
+    _drawArrow: function (ctx, x, y, direction, speed, scale, color) {
+        const angleRad = (direction - 90) * Math.PI / 180;
+        const arrowLength = Math.max(5, Math.min(50, speed * scale));
+        const endX = x + arrowLength * Math.cos(angleRad);
+        const endY = y + arrowLength * Math.sin(angleRad);
+
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(endX, endY);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        const arrowHeadLength = arrowLength * 0.2;
+        const arrowHeadAngle = Math.PI / 6;
+        const angle1 = angleRad + Math.PI - arrowHeadAngle;
+        const angle2 = angleRad + Math.PI + arrowHeadAngle;
+
+        ctx.beginPath();
+        ctx.moveTo(endX, endY);
+        ctx.lineTo(endX + arrowHeadLength * Math.cos(angle1), endY + arrowHeadLength * Math.sin(angle1));
+        ctx.lineTo(endX + arrowHeadLength * Math.cos(angle2), endY + arrowHeadLength * Math.sin(angle2));
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+    },
+
+    _getColorBySpeed: function (speed) {
+        if (speed >= 2.0) return '#ff0000';
+        if (speed >= 1.0) return '#ff6600';
+        if (speed >= 0.5) return '#ffaa00';
+        if (speed >= 0.2) return '#ffcc00';
+        return '#0066cc';
+    }
+});
+
+// Factory function
+L.canvasArrowLayer = function (options) {
+    return new L.CanvasArrowLayer(options);
+};
+
 // ===== HEATMAP LAYER CLASS (SỬ DỤNG LEAFLET.HEAT) ===== //
 /**
  * Layer sử dụng Leaflet.heat cho heatmap (nhanh hơn Canvas 10-50x)
@@ -51,10 +212,9 @@ L.HeatHydroLayer = L.LayerGroup.extend({
         this._heatLayer = L.heatLayer([], this._getHeatOptions());
         this.addLayer(this._heatLayer);
 
-        // Tạo canvas layer cho arrows (custom canvas)
-        this._arrowCanvasLayer = L.layerGroup();
-        this._arrowCanvas = null;
-        this._arrowCanvasCtx = null;
+        // Tạo custom canvas layer cho arrows (Leaflet tự động quản lý position)
+        this._arrowCanvasLayer = L.canvasArrowLayer();
+        this._arrowRedrawTimeout = null; // Timeout cho debounce
         this.addLayer(this._arrowCanvasLayer);
 
         // Tạo legend
@@ -62,8 +222,10 @@ L.HeatHydroLayer = L.LayerGroup.extend({
             this._createLegend();
         }
 
-        // Vẽ lại khi map thay đổi
+        // Vẽ lại khi map thay đổi (với debounce để tránh vẽ quá nhiều)
+        map.on('move', this._scheduleArrowRedraw, this);
         map.on('moveend', this._redrawArrows, this);
+        map.on('zoom', this._scheduleArrowRedraw, this);
         map.on('zoomend', this._redrawArrows, this);
     },
 
@@ -74,14 +236,15 @@ L.HeatHydroLayer = L.LayerGroup.extend({
         this.stopAnimation();
         this._removeLegend();
 
-        // Xóa canvas
-        if (this._arrowCanvas && this._arrowCanvas.parentNode) {
-            this._arrowCanvas.parentNode.removeChild(this._arrowCanvas);
+        // Clear timeout
+        if (this._arrowRedrawTimeout) {
+            clearTimeout(this._arrowRedrawTimeout);
+            this._arrowRedrawTimeout = null;
         }
-        this._arrowCanvas = null;
-        this._arrowCanvasCtx = null;
 
+        map.off('move', this._scheduleArrowRedraw, this);
         map.off('moveend', this._redrawArrows, this);
+        map.off('zoom', this._scheduleArrowRedraw, this);
         map.off('zoomend', this._redrawArrows, this);
         L.LayerGroup.prototype.onRemove.call(this, map);
     },
@@ -221,143 +384,34 @@ L.HeatHydroLayer = L.LayerGroup.extend({
     },
 
     /**
+     * Lên lịch vẽ lại arrows (với debounce)
+     */
+    _scheduleArrowRedraw: function () {
+        if (this._arrowRedrawTimeout) {
+            clearTimeout(this._arrowRedrawTimeout);
+        }
+        const self = this;
+        this._arrowRedrawTimeout = setTimeout(() => {
+            self._redrawArrows();
+        }, 50); // Debounce 50ms
+    },
+
+    /**
      * Vẽ vector arrows trên canvas
      */
     _redrawArrows: function () {
-        if (!this._map || this._data.length === 0) return;
-
-        // Tạo canvas nếu chưa có
-        if (!this._arrowCanvas) {
-            this._arrowCanvas = L.DomUtil.create('canvas', 'leaflet-arrow-canvas');
-            this._arrowCanvas.style.position = 'absolute';
-            this._arrowCanvas.style.top = '0';
-            this._arrowCanvas.style.left = '0';
-            this._arrowCanvas.style.pointerEvents = 'none';
-            this._arrowCanvas.style.zIndex = '650';
-            const pane = this._map.getPane('overlayPane') || this._map.getPane();
-            pane.appendChild(this._arrowCanvas);
-            this._arrowCanvasCtx = this._arrowCanvas.getContext('2d');
+        // Clear timeout nếu có
+        if (this._arrowRedrawTimeout) {
+            clearTimeout(this._arrowRedrawTimeout);
+            this._arrowRedrawTimeout = null;
         }
+        if (!this._map || this._data.length === 0 || !this._arrowCanvasLayer) return;
 
-        const canvas = this._arrowCanvas;
-        const ctx = this._arrowCanvasCtx;
-
-        // Cập nhật kích thước và vị trí canvas
-        const mapSize = this._map.getSize();
-        const pixelRatio = window.devicePixelRatio || 1;
-        canvas.width = mapSize.x * pixelRatio;
-        canvas.height = mapSize.y * pixelRatio;
-        canvas.style.width = mapSize.x + 'px';
-        canvas.style.height = mapSize.y + 'px';
-
-        // Reset transform trước khi scale
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.scale(pixelRatio, pixelRatio);
-
-        // Clear canvas
-        ctx.clearRect(0, 0, mapSize.x, mapSize.y);
-
-        // Arrow spacing động theo zoom
-        const zoom = this._map.getZoom();
-        let arrowSpacing = this.options.arrowSpacing || 30;
-        if (zoom < 10) {
-            arrowSpacing = 60;
-        } else if (zoom < 13) {
-            arrowSpacing = 40;
-        } else {
-            arrowSpacing = 30;
-        }
-
-        const arrowScale = this.options.arrowScale || 50;
-        const bounds = this._map.getBounds();
-
-        // Lọc dữ liệu trong viewport
-        const visibleData = this._data.filter(point => {
-            return point.lat >= bounds.getSouth() && point.lat <= bounds.getNorth() &&
-                point.lng >= bounds.getWest() && point.lng <= bounds.getEast() &&
-                point.direction != null && point.speed > 0;
+        // Sử dụng arrowCanvasLayer để vẽ (Leaflet tự động quản lý position)
+        this._arrowCanvasLayer.setData(this._data, this._map, {
+            arrowColor: this._arrowColor,
+            arrowScale: this.options.arrowScale || 50
         });
-
-        if (visibleData.length === 0) return;
-
-        // Sampling nếu quá nhiều điểm
-        const maxArrows = 2000; // Giới hạn số arrows
-        let sampledData = visibleData;
-        if (visibleData.length > maxArrows) {
-            const step = Math.ceil(visibleData.length / maxArrows);
-            sampledData = visibleData.filter((_, i) => i % step === 0);
-        }
-
-        // Chuyển đổi sang pixel coordinates
-        const pixelData = sampledData.map(point => {
-            const pixel = this._map.latLngToContainerPoint([point.lat, point.lng]);
-            return {
-                ...point,
-                pixelX: pixel.x,
-                pixelY: pixel.y
-            };
-        });
-
-        // Tạo grid để vẽ arrows đều
-        const gridCols = Math.ceil(mapSize.x / arrowSpacing);
-        const gridRows = Math.ceil(mapSize.y / arrowSpacing);
-
-        // Tạo spatial index
-        const cellSize = arrowSpacing * 1.5;
-        const spatialGrid = {};
-        pixelData.forEach(point => {
-            const cellX = Math.floor(point.pixelX / cellSize);
-            const cellY = Math.floor(point.pixelY / cellSize);
-            const key = `${cellX},${cellY}`;
-            if (!spatialGrid[key]) {
-                spatialGrid[key] = [];
-            }
-            spatialGrid[key].push(point);
-        });
-
-        // Vẽ arrows
-        ctx.save();
-        for (let row = 0; row < gridRows; row++) {
-            for (let col = 0; col < gridCols; col++) {
-                const gridX = col * arrowSpacing;
-                const gridY = row * arrowSpacing;
-
-                // Tìm điểm gần nhất
-                const cellX = Math.floor(gridX / cellSize);
-                const cellY = Math.floor(gridY / cellSize);
-                let nearestPoint = null;
-                let minDistance = Infinity;
-
-                for (let dx = -1; dx <= 1; dx++) {
-                    for (let dy = -1; dy <= 1; dy++) {
-                        const key = `${cellX + dx},${cellY + dy}`;
-                        if (spatialGrid[key]) {
-                            spatialGrid[key].forEach(point => {
-                                const distance = Math.sqrt(
-                                    Math.pow(gridX - point.pixelX, 2) + Math.pow(gridY - point.pixelY, 2)
-                                );
-                                if (distance < minDistance && distance < arrowSpacing * 1.5) {
-                                    minDistance = distance;
-                                    nearestPoint = point;
-                                }
-                            });
-                        }
-                    }
-                }
-
-                // Vẽ arrow tại vị trí thực tế của điểm (không phải grid position)
-                if (nearestPoint) {
-                    const arrowColor = this._arrowColor === 'speed'
-                        ? this._getColorBySpeed(nearestPoint.speed)
-                        : this._arrowColor === 'black'
-                            ? '#000000'
-                            : this._arrowColor;
-                    // Vẽ tại vị trí pixel thực tế của điểm
-                    this._drawArrow(ctx, nearestPoint.pixelX, nearestPoint.pixelY, nearestPoint.direction, nearestPoint.speed, arrowScale, arrowColor);
-                }
-            }
-        }
-        ctx.restore();
     },
 
     /**
@@ -496,7 +550,7 @@ L.HeatHydroLayer = L.LayerGroup.extend({
         // Clear nội dung cũ
         this._legendContainer.innerHTML = '';
 
-        const fieldName = this._colorField === 'surface_elev' ? 'Surface elevation [m]' : 'Total depth [m]';
+        const fieldName = this._colorField === 'surface_elev' ? 'Độ cao bề mặt [m]' : 'Độ sâu [m]';
 
         // Tạo title
         const title = L.DomUtil.create('div', 'legend-title', this._legendContainer);
